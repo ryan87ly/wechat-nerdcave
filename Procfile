@@ -1,1 +1,1 @@
-web: java -jar build/libs/wechat-nerdcave-all.jar
+web: java -jar -Dserver.port=$PORT build/libs/wechat-nerdcave-all.jar
