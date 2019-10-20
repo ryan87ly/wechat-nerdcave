@@ -51,3 +51,8 @@ tasks.withType<KotlinCompile> {
         jvmTarget = "11"
     }
 }
+
+task("stage"){
+    dependsOn("build", "clean")
+}
+tasks["build"].mustRunAfter(tasks["clean"])
