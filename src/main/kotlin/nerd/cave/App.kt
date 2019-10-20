@@ -9,6 +9,4 @@ fun main(args: Array<String>) = runBlocking<Unit> {
     } catch (t: Throwable) {
         println("Error when starting MyServer $t")
     }
-
-
 }
