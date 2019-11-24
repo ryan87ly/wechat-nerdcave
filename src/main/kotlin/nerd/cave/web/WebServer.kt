@@ -4,10 +4,15 @@ import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.kotlin.core.http.listenAwait
+import nerd.cave.web.client.WebClient
 import nerd.cave.web.endpoints.GreetingEndpoints
+import nerd.cave.web.endpoints.api.ApiEndpoints
+import nerd.cave.web.wx.WXWebClient
 
-class WebServer(val vertx: Vertx) {
+class WebServer(val vertx: Vertx, val webClient: WebClient) {
+    private val wxWebClient = WXWebClient(webClient)
     lateinit var httpServer: HttpServer
 
     suspend fun start() {
@@ -25,7 +30,9 @@ class WebServer(val vertx: Vertx) {
     private fun buildRouter(): Router {
         return Router.router(vertx).apply {
             route().handler(BodyHandler.create())
-            mountSubRouter("/greeting", GreetingEndpoints(vertx).router)
+            route("/swagger/*").handler(StaticHandler.create("webroot/swagger"))
+            mountSubRouter("/api", ApiEndpoints(vertx, wxWebClient).router)
+            mountSubRouter("/greeting", GreetingEndpoints(vertx, webClient).router)
         }
     }
 }

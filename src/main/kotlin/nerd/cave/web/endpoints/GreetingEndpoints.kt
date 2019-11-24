@@ -7,10 +7,11 @@ import io.vertx.kotlin.core.json.get
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.dispatcher
 import kotlinx.coroutines.delay
+import nerd.cave.web.client.WebClient
 import nerd.cave.web.exceptions.ForbiddenException
 import nerd.cave.web.extentions.coroutine
 
-class GreetingEndpoints(vertx: Vertx): HttpEndpoint {
+class GreetingEndpoints(vertx: Vertx, webClient: WebClient): HttpEndpoint {
     override val router = router(vertx).coroutine(vertx.dispatcher()).apply {
         get("/"){ greeting(it) }
         post("/:name") { greetingWithBody(it) }
