@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 apply(plugin = "com.github.johnrengelman.shadow")
 
-
 plugins {
     val kotlinVersion = "1.3.50"
     // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
@@ -27,6 +26,7 @@ repositories {
 }
 
 val vertxVersion = "3.8.3"
+val kmongoVersion = "3.11.1"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -35,6 +35,8 @@ dependencies {
     implementation("io.vertx:vertx-lang-kotlin:${vertxVersion}")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:${vertxVersion}")
     implementation("io.vertx:vertx-web-client:${vertxVersion}")
+    implementation("org.litote.kmongo:kmongo-async:${kmongoVersion}")
+    implementation("org.litote.kmongo:kmongo-coroutine:${kmongoVersion}")
     implementation(kotlin("stdlib-jdk8"))
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")

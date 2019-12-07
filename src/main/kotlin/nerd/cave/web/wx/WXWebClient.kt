@@ -6,7 +6,6 @@ import nerd.cave.web.client.WebClient
 class WXWebClient(val webClient: WebClient) {
     private val appId = retrieveKey(APP_ID_KEY)
     private val appSecret = retrieveKey(APP_SECRET_KEY)
-    private val host = "https://api.weixin.qq.com"
 
     private val baseQuery = mapOf(
         "appid" to appId,
@@ -14,11 +13,13 @@ class WXWebClient(val webClient: WebClient) {
     )
 
     companion object {
-        private val APP_ID_KEY = "WECHAT_APP_SECRET"
+        private val APP_ID_KEY = "WECHAT_APP_ID"
         private val APP_SECRET_KEY = "WECHAT_APP_SECRET"
+        private val HOST = "https://api.weixin.qq.com"
         private val CODE_2_SESSION: String = "/sns/jscode2session"
 
-        fun retrieveKey(key:String): String {
+        fun retrieveKey(key:String): String? {
+            println("$key:$key")
             return System.getenv(key)
         }
     }
@@ -34,6 +35,6 @@ class WXWebClient(val webClient: WebClient) {
         val queryString = baseQuery.plus(queryStringPairs.toList())
             .map { "${it.key}=${it.value}" }
             .reduce { acc, s -> "$acc&$s" }
-        return "$host$path?$queryString"
+        return "$HOST$path?$queryString"
     }
 }
