@@ -68,7 +68,7 @@ class WebServer(
             route().handler(BodyHandler.create())
             route("/swagger/*", StaticHandler.create("webroot/swagger"))
             route("/swagger", redirect("/swagger/"))
-            mountSubRouter("/api", ApiEndpoints(vertx, clock, wxWebClient, wxPayClient, storeService, sessionHandler, memberService, paymentService).router)
+            mountSubRouter("/api", ApiEndpoints(vertx, clock, wxWebClient, wxPayClient, paymentSecretRetriever, storeService, sessionHandler, memberService, paymentService).router)
             mountSubRouter("/greeting", GreetingEndpoints(vertx, wxConfig, webClient, wxPayClient).router)
             mountSubRouter("/mnt", ManagementEndpoints(vertx).router)
         }

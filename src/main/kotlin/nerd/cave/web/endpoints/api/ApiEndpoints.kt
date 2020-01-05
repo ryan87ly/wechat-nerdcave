@@ -14,6 +14,7 @@ import nerd.cave.web.endpoints.api.product.ProductEndpoints
 import nerd.cave.web.endpoints.notification.NotificationEndpoints
 import nerd.cave.web.session.NerdCaveSessionHandler
 import nerd.cave.web.wx.WXWebClient
+import nerd.cave.web.wx.payment.PaymentSecretRetriever
 import nerd.cave.web.wx.payment.WXPayClient
 import java.time.Clock
 
@@ -22,6 +23,7 @@ class ApiEndpoints (
     clock: Clock,
     wxWebClient: WXWebClient,
     wxPayClient: WXPayClient,
+    paymentSecretRetriever: PaymentSecretRetriever,
     storeService: StoreService,
     sessionHandler: NerdCaveSessionHandler,
     memberService: MemberService,
@@ -33,7 +35,7 @@ class ApiEndpoints (
         mountSubRouter("/notification", NotificationEndpoints(vertx).router)
         mountSubRouter("/action", ActionEndpoints(vertx, sessionHandler).router)
         mountSubRouter("/product", ProductEndpoints(vertx, storeService.productStoreService, sessionHandler).router)
-        mountSubRouter("/payment", PaymentEndpoints(vertx, clock, wxPayClient, sessionHandler, memberService, paymentService, storeService.productStoreService).router)
+        mountSubRouter("/payment", PaymentEndpoints(vertx, clock, wxPayClient, sessionHandler, paymentSecretRetriever, memberService, paymentService, storeService.productStoreService).router)
         options().handler { ctx ->
             ctx.response().apply {
                 headers().apply {

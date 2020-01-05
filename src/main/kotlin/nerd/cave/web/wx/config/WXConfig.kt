@@ -27,7 +27,7 @@ sealed class WXConfig(val paymentHost: String, val notifyUrl: String) {
 
 object Local: WXConfig(
     "https://api.mch.weixin.qq.com/sandboxnew/pay",
-    "http://123.202.193.237/notification/paymentcallback") {
+    "https://www.nerdcave.club/api/notification/paymentcallback") {
 }
 
 object UAT: WXConfig(

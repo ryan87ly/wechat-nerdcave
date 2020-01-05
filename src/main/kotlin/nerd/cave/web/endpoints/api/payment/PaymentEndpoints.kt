@@ -1,5 +1,6 @@
 package nerd.cave.web.endpoints.api.payment
 
+import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
@@ -16,6 +17,7 @@ import nerd.cave.web.extentions.endIfOpen
 import nerd.cave.web.session.NerdCaveSessionHandler
 import nerd.cave.web.session.nerdCaveMember
 import nerd.cave.web.wx.HASH_ALGORITHM
+import nerd.cave.web.wx.payment.PaymentSecretRetriever
 import nerd.cave.web.wx.payment.WXPayApiFields
 import nerd.cave.web.wx.payment.WXPayClient
 import nerd.cave.web.wx.payment.toWXPaymentResponse
@@ -28,6 +30,7 @@ class PaymentEndpoints(
     private val clock: Clock,
     private val wxPayClient: WXPayClient,
     sessionHandler: NerdCaveSessionHandler,
+    private val paymentSecretRetriever: PaymentSecretRetriever,
     private val memberService: MemberService,
     private val paymentService: PaymentService,
     private val productStoreService: ProductStoreService
@@ -38,7 +41,9 @@ class PaymentEndpoints(
 
     override val router = Router.router(vertx).coroutine(vertx.dispatcher(), logger).apply {
         route(sessionHandler.handler)
+        post("/refreshSignKey") { refreshSignKey(it) }
         post("/placeOrder") { placeOrder(it) }
+
     }
 
     private suspend fun placeOrder(ctx: RoutingContext) {
@@ -90,5 +95,10 @@ class PaymentEndpoints(
         } else {
             throw BadRequestException("WX pay request failed $prepayInfo")
         }
+    }
+
+    private suspend fun refreshSignKey(ctx: RoutingContext) {
+        paymentSecretRetriever.refreshAndRetrievePaymentSecret()
+        ctx.response().endIfOpen(HttpResponseStatus.OK)
     }
 }

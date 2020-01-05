@@ -1,6 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.time.ZonedDateTime
+import java.time.Clock
+import java.time.ZoneOffset
 
 apply(plugin = "com.github.johnrengelman.shadow")
+val timeStamp = ZonedDateTime.now(Clock.system(ZoneOffset.ofHours(8))).toEpochSecond()
+
+println("timestamp $timeStamp")
+rootProject.version="1.0.0-$timeStamp"
 
 plugins {
     val kotlinVersion = "1.3.50"
