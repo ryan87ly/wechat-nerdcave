@@ -1,11 +1,22 @@
-package nerd.cave.store
+package nerd.cave.store.config
 
 import com.mongodb.MongoClientSettings
 import com.mongodb.MongoCredential
 import com.mongodb.ServerAddress
+import nerd.cave.Environment
 
 interface MongoConfig {
     val mongoClientSetting: MongoClientSettings
+
+    companion object {
+        fun forEnv(env: Environment): MongoConfig {
+            return when(env) {
+                Environment.LOCAL -> Local
+                Environment.UAT -> Prod
+                Environment.PROD -> Prod
+            }
+        }
+    }
 
     object Local : MongoConfig {
         override val mongoClientSetting: MongoClientSettings
@@ -23,11 +34,13 @@ interface MongoConfig {
             get() = MongoClientSettings.builder().apply {
                 applyToClusterSettings {
                     it.hosts(listOf(
-                        ServerAddress("193.112.62.230", 27017)
+                        ServerAddress("172.16.0.14", 27017)
                     ))
                     credential(MongoCredential.createCredential("nerdcave", "admin", System.getenv("DB_PASSWORD").toCharArray()))
                 }
             }.build()
     }
+
+
 }
 

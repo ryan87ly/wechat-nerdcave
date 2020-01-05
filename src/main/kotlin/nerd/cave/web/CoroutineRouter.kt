@@ -4,14 +4,18 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
+import io.vertx.kotlin.core.json.jsonObjectOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import nerd.cave.logger
 import nerd.cave.web.exceptions.HttpHandlerException
+import nerd.cave.web.exceptions.InternalServerErrorException
 import nerd.cave.web.extentions.endIfOpen
+import org.slf4j.Logger
 import kotlin.coroutines.CoroutineContext
 
-class CoroutineRouter(val dispatcher: CoroutineDispatcher, router: Router): Router by router, CoroutineScope {
+class CoroutineRouter(private val dispatcher: CoroutineDispatcher, private val logger: Logger, router: Router): Router by router, CoroutineScope {
 
     override val coroutineContext: CoroutineContext
         get() = dispatcher
@@ -23,6 +27,13 @@ class CoroutineRouter(val dispatcher: CoroutineDispatcher, router: Router): Rout
         return route(HttpMethod.GET, path, handler)
     }
 
+    fun delete(
+        path: String,
+        handler: suspend (RoutingContext) -> Unit
+    ): Route {
+        return route(HttpMethod.DELETE, path, handler)
+    }
+
     fun post(
         path: String,
         handler: suspend (RoutingContext) -> Unit
@@ -31,20 +42,30 @@ class CoroutineRouter(val dispatcher: CoroutineDispatcher, router: Router): Rout
     }
 
     fun route(
+        handler: suspend (RoutingContext) -> Unit
+    ): Route {
+        return handle(route(), handler)
+    }
+
+    fun route(
         method: HttpMethod,
         path: String,
         handler: suspend (RoutingContext) -> Unit
     ): Route {
-        return route(method, path).handler { ctx ->
+        return handle(route(method, path), handler)
+    }
+
+    private fun handle(route: Route, handler: suspend (RoutingContext) -> Unit): Route {
+        return route.handler { ctx ->
             launch {
                 try {
                     handler(ctx)
                 } catch (e: HttpHandlerException) {
-                    println("HttpHandlerException in handler $e")
-                    ctx.response().endIfOpen(e.statusCode, e.message)
+                    logger.warn("HttpHandlerException in handler $e")
+                    ctx.response().endIfOpen(e)
                 } catch (t: Throwable) {
-                    println("Exception in handler $t")
-                    ctx.response().endIfOpen(500, t.message)
+                    logger.warn("Exception in handler $t")
+                    ctx.response().endIfOpen(InternalServerErrorException(t.message))
                 }
             }
         }

@@ -8,3 +8,8 @@ build
 *.iml
 *.ipr
 *.class
+out/
+target/
+
+/target
+*.log

@@ -37,10 +37,20 @@ dependencies {
     implementation("io.vertx:vertx-web-client:${vertxVersion}")
     implementation("org.litote.kmongo:kmongo-async:${kmongoVersion}")
     implementation("org.litote.kmongo:kmongo-coroutine:${kmongoVersion}")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.9.9")
+    implementation("commons-codec:commons-codec:1.13")
+    implementation("org.slf4j:slf4j-api:1.7.29")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.12.1")
+
     implementation(kotlin("stdlib-jdk8"))
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.5.2")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 application {

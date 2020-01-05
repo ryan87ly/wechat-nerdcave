@@ -1,6 +1,9 @@
 package nerd.cave
 
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
+
+val logger = LoggerFactory.getLogger("App Main")
 
 fun main(args: Array<String>) = runBlocking<Unit> {
     val env = Environment.fromSystemEnv()
@@ -8,6 +11,6 @@ fun main(args: Array<String>) = runBlocking<Unit> {
     try {
         server.start()
     } catch (t: Throwable) {
-        println("Error when starting MyServer $t")
+        logger.error("Error when starting MyServer $t")
     }
 }
