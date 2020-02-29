@@ -6,7 +6,7 @@ import nerd.cave.store.ProductStoreService
 import java.time.Clock
 
 class MongoProductStoreService(private val clock: Clock, mongoStoreService: MongoStoreService): ProductStoreService {
-    private val collection = mongoStoreService.getCollection<Product>()
+    private val collection by lazy {  mongoStoreService.getCollection<Product>() }
 
     override suspend fun start() {
         collection.ensureIndex("id" eq 1, IndexOptions().unique(true))

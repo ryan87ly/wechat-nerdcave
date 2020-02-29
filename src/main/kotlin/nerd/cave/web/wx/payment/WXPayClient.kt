@@ -3,6 +3,7 @@ package nerd.cave.web.wx.payment
 import nerd.cave.web.client.WebClient
 import nerd.cave.web.wx.WXApi
 import nerd.cave.web.wx.config.WXConfig
+import nerd.cave.xml.fromXmlToMap
 import org.slf4j.LoggerFactory
 import kotlin.math.abs
 import kotlin.random.Random

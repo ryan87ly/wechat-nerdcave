@@ -11,7 +11,6 @@ fun sign(paymentSecretKey:String, vararg params: Pair<String, Any>): String {
         .plus("key" to paymentSecretKey)
         .map { "${it.first}=${it.second}" }
         .reduce { acc, s -> "$acc&$s" }
-    println("string to be hashed: $stringToBeHashed")
     return stringToBeHashed.toMD5()
 }
 

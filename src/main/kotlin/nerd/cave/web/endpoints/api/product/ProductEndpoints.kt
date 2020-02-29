@@ -12,16 +12,19 @@ import io.vertx.kotlin.coroutines.dispatcher
 import nerd.cave.enum.fromString
 import nerd.cave.model.product.*
 import nerd.cave.store.ProductStoreService
+import nerd.cave.util.MongoIdGenerator
 import nerd.cave.web.endpoints.HttpEndpoint
 import nerd.cave.web.exceptions.BadRequestException
 import nerd.cave.web.exceptions.ResourceNotFoundException
 import nerd.cave.web.extentions.coroutine
 import nerd.cave.web.extentions.endIfOpen
+import nerd.cave.web.extentions.ok
 import nerd.cave.web.session.NerdCaveSessionHandler
 import org.slf4j.LoggerFactory
-import java.util.*
 
 class ProductEndpoints(vertx: Vertx, private val productStoreService: ProductStoreService, sessionHandler: NerdCaveSessionHandler): HttpEndpoint {
+    private val idGenerator = MongoIdGenerator()
+
     companion object {
         private val logger = LoggerFactory.getLogger(ProductEndpoints::class.java)
     }
@@ -29,20 +32,20 @@ class ProductEndpoints(vertx: Vertx, private val productStoreService: ProductSto
     override val router: Router = Router.router(vertx).coroutine(vertx.dispatcher(), ProductEndpoints.logger).apply {
         route(sessionHandler.handler)
         post("/") { newProduct(it) }
-        get("/products") { allProducts(it) }
+        get("/all") { allProducts(it) }
         get("/:id") { productById(it)}
         delete("/:id") { deleteProductById(it) }
     }
 
     private suspend fun allProducts(ctx: RoutingContext) {
         val products = productStoreService.fetchAll()
-        ctx.response().endIfOpen(jsonArrayOf(*products.toTypedArray()))
+        ctx.response().ok(jsonArrayOf(*products.toTypedArray()))
     }
 
     private suspend fun productById(ctx: RoutingContext) {
         val productId = ctx.request().params().get("id")
         val product = productStoreService.fetchById(productId) ?: throw ResourceNotFoundException("Product id: [$productId] not found")
-        ctx.response().endIfOpen(mapFrom(product))
+        ctx.response().ok(mapFrom(product))
     }
 
     private suspend fun deleteProductById(ctx: RoutingContext) {
@@ -54,7 +57,7 @@ class ProductEndpoints(vertx: Vertx, private val productStoreService: ProductSto
     private suspend fun newProduct(ctx: RoutingContext) {
         val productTypeStr = ctx.bodyAsJson.getString("productType")
         val productType = fromString<ProductType>(productTypeStr) ?: throw BadRequestException("Unable to find product type [$productTypeStr]")
-        val id = UUID.randomUUID().toString()
+        val id = idGenerator.nextId()
         val detailJson = ctx.bodyAsJson.getJsonObject("detail")
         val detail = toProductDetail(productType, detailJson)
         val description = ctx.bodyAsJson.getString("description")

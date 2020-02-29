@@ -4,11 +4,9 @@ import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.Route
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
-import io.vertx.kotlin.core.json.jsonObjectOf
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import nerd.cave.logger
 import nerd.cave.web.exceptions.HttpHandlerException
 import nerd.cave.web.exceptions.InternalServerErrorException
 import nerd.cave.web.extentions.endIfOpen
@@ -64,7 +62,7 @@ class CoroutineRouter(private val dispatcher: CoroutineDispatcher, private val l
                     logger.warn("HttpHandlerException in handler $e")
                     ctx.response().endIfOpen(e)
                 } catch (t: Throwable) {
-                    logger.warn("Exception in handler $t")
+                    logger.error("Exception in handler $t", t)
                     ctx.response().endIfOpen(InternalServerErrorException(t.message))
                 }
             }

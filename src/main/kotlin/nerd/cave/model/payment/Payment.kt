@@ -9,12 +9,14 @@ data class Payment (
     val status: PaymentStatus,
     val wxPrepayId: String? = null,
     val wxPrepayInfo: Map<String, String>? = null,
-    val wxTransactionId: String? = null
+    val wxTransactionId: String? = null,
+    val wxPaymentCallback: Map<String, String>? = null,
+    val wxPaymentEndTime: String? = null
 )
 
 enum class PaymentStatus {
     Initial,
     Prepay,
-    Complete,
+    Completed,
     Aborted
 }

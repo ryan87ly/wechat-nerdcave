@@ -14,7 +14,7 @@
       "url": "https://www.nerdcave.club/api"
     },
     {
-      "url": "http://www.nerdcave.club/api"
+      "url": "http://localhost:8080/api"
     }
   ],
   "tags": [
@@ -23,8 +23,28 @@
       "description": "Login operation"
     },
     {
-      "name": "user",
-      "description": "Operations about user"
+      "name": "member",
+      "description": "Member info"
+    },
+    {
+      "name": "product",
+      "description": "nerdcave product"
+    },
+    {
+      "name": "payment",
+      "description": "wechat payment"
+    },
+    {
+      "name": "branch",
+      "description": "分店信息"
+    },
+    {
+      "name": "checkIn",
+      "description": "用户打卡"
+    },
+    {
+      "name": "disclaimer",
+      "description": "memeber disclaimer"
     }
   ],
   "paths": {
@@ -40,7 +60,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/WXCode"
+                "$ref": "#/components/schemas/WXInfo"
               }
             }
           },
@@ -53,6 +73,35 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Member"
+                },
+                "examples": {
+                  "NormalMember": {
+                    "value": {
+                      "memberType": "NORMAL",
+                      "memberDetail": {
+                        "memberType": "NORMAL",
+                        "remainingEntries": 10
+                      }
+                    }
+                  },
+                  "YearlyMember": {
+                    "value": {
+                      "memberType": "YEARLY",
+                      "memberDetail": {
+                        "memberType": "YEARLY",
+                        "expiryDate": "20210228"
+                      }
+                    }
+                  },
+                  "MonthlyMember": {
+                    "value": {
+                      "memberType": "MONTHLY",
+                      "memberDetail": {
+                        "memberType": "MONTHLY",
+                        "expiryDate": "20210228"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -71,106 +120,127 @@
         "x-codegen-request-body-name": "body"
       }
     },
-    "/user": {
+    "/member/info": {
+      "get": {
+        "tags": [
+          "member"
+        ],
+        "summary": "Get member info",
+        "operationId": "member info",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Member"
+                },
+                "examples": {
+                  "NormalMember": {
+                    "value": {
+                      "memberType": "NORMAL",
+                      "memberDetail": {
+                        "memberType": "NORMAL",
+                        "remainingEntries": 10
+                      }
+                    }
+                  },
+                  "YearlyMember": {
+                    "value": {
+                      "memberType": "YEARLY",
+                      "memberDetail": {
+                        "memberType": "YEARLY",
+                        "expiryDate": "20210228"
+                      }
+                    }
+                  },
+                  "MonthlyMember": {
+                    "value": {
+                      "memberType": "MONTHLY",
+                      "memberDetail": {
+                        "memberType": "MONTHLY",
+                        "expiryDate": "20210228"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/product/all": {
+      "get": {
+        "tags": [
+          "product"
+        ],
+        "summary": "All nerdcave products",
+        "operationId": "allProducts",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payment/placeOrder": {
       "post": {
         "tags": [
-          "user"
+          "payment"
         ],
-        "summary": "Create user",
+        "summary": "Place order",
         "description": "This can only be done by the logged in user.",
-        "operationId": "createUser",
+        "operationId": "placeOrder",
         "requestBody": {
-          "description": "Created user object",
+          "description": "Place order",
           "content": {
             "*/*": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "$ref": "#/components/schemas/Products"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "default": {
-            "description": "successful operation",
-            "content": {}
-          }
-        },
-        "x-codegen-request-body-name": "body"
-      }
-    },
-    "/user/createWithArray": {
-      "post": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Creates list of users with given input array",
-        "operationId": "createUsersWithArrayInput",
-        "requestBody": {
-          "description": "List of user object",
-          "content": {
-            "*/*": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/User"
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
                 }
               }
             }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "successful operation",
-            "content": {}
           }
         },
         "x-codegen-request-body-name": "body"
       }
     },
-    "/user/createWithList": {
-      "post": {
+    "/payment/info/{paymentId}": {
+      "get": {
         "tags": [
-          "user"
+          "payment"
         ],
-        "summary": "Creates list of users with given input array",
-        "operationId": "createUsersWithListInput",
-        "requestBody": {
-          "description": "List of user object",
-          "content": {
-            "*/*": {
-              "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "default": {
-            "description": "successful operation",
-            "content": {}
-          }
-        },
-        "x-codegen-request-body-name": "body"
-      }
-    },
-    "/user/login/{code}": {
-      "post": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Logs user into the system",
-        "operationId": "loginUser",
+        "summary": "Fetch payment",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "Fetch Payment",
         "parameters": [
           {
-            "name": "code",
+            "name": "paymentId",
             "in": "path",
-            "description": "The code for login",
+            "description": "Payment Id",
             "required": true,
             "schema": {
               "type": "string"
@@ -181,21 +251,358 @@
           "200": {
             "description": "successful operation",
             "content": {
-              "application/xml": {
-                "schema": {
-                  "type": "string"
-                }
-              },
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checkIn": {
+      "post": {
+        "tags": [
+          "checkIn"
+        ],
+        "summary": "Member check in",
+        "description": "用户一天只能打卡一次, 请先调用/checkIn/token查询",
+        "operationId": "Member Check In",
+        "requestBody": {
+          "description": "打卡",
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckInBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckInToken"
+                },
+                "example": {
+                  "checkInNumber": "2021",
+                  "hasEquipment": false
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid username/password supplied",
-            "content": {}
+            "description": "No ticket"
+          }
+        }
+      }
+    },
+    "/checkIn/token/{date}": {
+      "get": {
+        "tags": [
+          "checkIn"
+        ],
+        "summary": "Check member check-in token",
+        "description": "查询用户打卡号",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "description": "date",
+            "required": true,
+            "example": "20200220",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckInToken"
+                },
+                "example": {
+                  "checkInNumber": "2021",
+                  "hasEquipment": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not found"
+          }
+        }
+      }
+    },
+    "/checkIn/history/{startDate}": {
+      "get": {
+        "tags": [
+          "checkIn"
+        ],
+        "summary": "Member check in history from startDate(inclusive)",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "Member Check In History",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "path",
+            "description": "start date inclusive",
+            "required": true,
+            "example": "20200220",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArrayOfDate"
+                },
+                "example": [
+                  "20200227",
+                  "20200228"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checkIn/history/{startDate}/{endDate}": {
+      "get": {
+        "tags": [
+          "checkIn"
+        ],
+        "summary": "Member check in history from startDate(inclusive) to endDate(exclusive)",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "Member Check In History to endDate",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "path",
+            "description": "start date inclusive",
+            "required": true,
+            "example": "20200220",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "path",
+            "description": "start date exclusive",
+            "required": true,
+            "example": "20200301",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArrayOfDate"
+                },
+                "example": [
+                  "20200227",
+                  "20200228"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branch/all": {
+      "get": {
+        "tags": [
+          "branch"
+        ],
+        "summary": "All nerdcave branches",
+        "operationId": "allBranches",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Branch"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branch": {
+      "post": {
+        "tags": [
+          "branch"
+        ],
+        "summary": "Create nerdcave branch",
+        "operationId": "createBranch",
+        "requestBody": {
+          "description": "branch information",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Branch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Id"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branch/{branchId}": {
+      "get": {
+        "tags": [
+          "branch"
+        ],
+        "summary": "Get branch by id",
+        "operationId": "branchById",
+        "parameters": [
+          {
+            "name": "branchId",
+            "in": "path",
+            "description": "Branch Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Branch"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "branch"
+        ],
+        "summary": "Delete a branch",
+        "operationId": "deleteById",
+        "parameters": [
+          {
+            "name": "branchId",
+            "in": "path",
+            "description": "Branch Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "deleted"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/disclaimer/hasSigned": {
+      "get": {
+        "tags": [
+          "disclaimer"
+        ],
+        "summary": "Check whether member has signed disclaimer",
+        "operationId": "signed disclaimer",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignedBody"
+                },
+                "example": {
+                  "signed": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/disclaimer/sign": {
+      "post": {
+        "tags": [
+          "disclaimer"
+        ],
+        "requestBody": {
+          "description": "打卡",
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/DisclaimerBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ok"
+                },
+                "example": {
+                  "ok": 1
+                }
+              }
+            }
           }
         }
       }
@@ -203,45 +610,38 @@
   },
   "components": {
     "schemas": {
-      "User": {
+      "Id": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "username": {
             "type": "string"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          },
-          "phone": {
-            "type": "string"
-          },
-          "userStatus": {
-            "type": "integer",
-            "description": "User Status",
-            "format": "int32"
           }
         },
-        "xml": {
-          "name": "User"
+        "required": [
+          "id"
+        ]
+      },
+      "Products": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
         }
       },
-      "WXCode": {
+      "WXInfo": {
         "type": "object",
         "properties": {
           "code": {
+            "type": "string"
+          },
+          "nickName": {
+            "type": "string"
+          },
+          "gender": {
             "type": "string"
           }
         }
@@ -250,7 +650,12 @@
         "type": "object",
         "properties": {
           "memberType": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "NORMAL",
+              "MONTHLY",
+              "YEARLY"
+            ]
           },
           "memberDetail": {
             "type": "object",
@@ -258,10 +663,135 @@
           }
         }
       },
+      "Location": {
+        "type": "object",
+        "properties": {
+          "longitude": {
+            "type": "number"
+          },
+          "latitude": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "longitude",
+          "latitude",
+          "description"
+        ]
+      },
+      "OpenHour": {
+        "type": "object",
+        "properties": {
+          "openTime": {
+            "type": "string",
+            "format": "HHmmss"
+          },
+          "closeTime": {
+            "type": "string",
+            "format": "HHmmss"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "openTime",
+          "closeTime",
+          "description"
+        ]
+      },
+      "Branch": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "No need for branch creation"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "openHour": {
+            "$ref": "#/components/schemas/OpenHour"
+          },
+          "contactNumbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "location",
+          "openHour",
+          "contactNumbers",
+          "description"
+        ]
+      },
       "Error": {
         "type": "object",
         "properties": {
           "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "CheckInToken": {
+        "type": "object",
+        "properties": {
+          "checkInNumber": {
+            "type": "string"
+          },
+          "hasEquipment": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ArrayOfDate": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "CheckInBody": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "string"
+          }
+        }
+      },
+      "Ok": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "integer"
+          }
+        }
+      },
+      "SignedBody": {
+        "type": "object",
+        "properties": {
+          "signed": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DisclaimerBody": {
+        "type": "object",
+        "properties": {
+          "legalName": {
+            "type": "string"
+          },
+          "contactNumber": {
+            "type": "string"
+          },
+          "emergentContactNumber": {
             "type": "string"
           }
         }

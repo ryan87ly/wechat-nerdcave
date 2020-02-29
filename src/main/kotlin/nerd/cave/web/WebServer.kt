@@ -9,6 +9,7 @@ import io.vertx.kotlin.core.http.closeAwait
 import io.vertx.kotlin.core.http.listenAwait
 import nerd.cave.Environment
 import nerd.cave.component.LifeCycle
+import nerd.cave.service.checkin.CheckInService
 import nerd.cave.service.member.MemberService
 import nerd.cave.service.payment.PaymentService
 import nerd.cave.store.StoreService
@@ -33,7 +34,8 @@ class WebServer(
     private val webClient: WebClient,
     private val storeService: StoreService,
     private val memberService: MemberService,
-    private val paymentService: PaymentService
+    private val paymentService: PaymentService,
+    private val checkInService: CheckInService
 ): LifeCycle {
     private val wxConfig = WXConfig.forEnv(environment)
     private val paymentSecretRetriever = PaymentSecretRetriever.forEnv(environment, wxConfig, webClient)
@@ -66,9 +68,10 @@ class WebServer(
         val sessionHandler = NerdCaveSessionHandlerImpl(storeService.memberStoreService, storeService.sessionStoreService)
         return Router.router(vertx).apply {
             route().handler(BodyHandler.create())
-            route("/swagger/*", StaticHandler.create("webroot/swagger"))
+            route("/", StaticHandler.create("web").setMaxAgeSeconds(0))
+            route("/swagger/*", StaticHandler.create("webroot/swagger").setMaxAgeSeconds(0))
             route("/swagger", redirect("/swagger/"))
-            mountSubRouter("/api", ApiEndpoints(vertx, clock, wxWebClient, wxPayClient, paymentSecretRetriever, storeService, sessionHandler, memberService, paymentService).router)
+            mountSubRouter("/api", ApiEndpoints(vertx, clock, wxWebClient, wxPayClient, paymentSecretRetriever, storeService, sessionHandler, memberService, paymentService, checkInService).router)
             mountSubRouter("/greeting", GreetingEndpoints(vertx, wxConfig, webClient, wxPayClient).router)
             mountSubRouter("/mnt", ManagementEndpoints(vertx).router)
         }

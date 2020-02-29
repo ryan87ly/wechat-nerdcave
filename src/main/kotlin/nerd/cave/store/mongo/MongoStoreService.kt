@@ -13,9 +13,15 @@ class MongoStoreService(private val config: MongoConfig, private val clock: Cloc
     private lateinit var mongoClient: CoroutineClient
     lateinit var db: CoroutineDatabase
     override val memberStoreService: MemberStoreService by lazy { MongoMemberStoreService(clock, this) }
+    override val memberEventStoreService: MemberEventStoreService by lazy { MongoMemberEventStoreService(this) }
     override val sessionStoreService: SessionStoreService by lazy { MongoSessionStoreService(clock, this) }
     override val productStoreService: ProductStoreService by lazy { MongoProductStoreService(clock, this) }
+    override val branchStoreService: BranchStoreService by lazy { MongoBranchStoreService(this) }
     override val paymentStoreService: PaymentStoreService by lazy { MongoPaymentStoreService(this) }
+    override val ticketStoreService: TicketStoreService by lazy { MongoTicketStoreService(this) }
+    override val tokenStoreService: TokenStoreService by lazy { MongoTokenStoreService(this) }
+    override val wxPaymentCallbackStoreService: WXPaymentCallbackStoreService by lazy { MongoWXPaymentCallbackStoreService(this) }
+    override val disclaimerStoreService: DisclaimerStoreService by lazy { MongoDisclaimerStoreService(this) }
 
     private val storeServices by lazy { listOf(memberStoreService, sessionStoreService, productStoreService) }
 

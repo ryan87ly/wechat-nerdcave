@@ -2,50 +2,20 @@ package nerd.cave.model.member
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import nerd.cave.util.CHECKIN_DATE_FORMMATER
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
 data class Member(
-    val memberId: String,
-    val memberType: MemberType,
-    val memberDetail: MemberDetail,
+    val id: String,
     val memberSourceType: MemberSourceType,
     val memberSource: MemberSource,
     val registerTime: ZonedDateTime
 )
-
-@JsonTypeInfo(use= JsonTypeInfo.Id.NAME, include= JsonTypeInfo.As.PROPERTY, property="memberType")
-@JsonSubTypes(
-    JsonSubTypes.Type(value = NormalMember::class, name = "NORMAL"),
-    JsonSubTypes.Type(value = LimitedEntriesMember::class, name = "LIMITED_ENTRIES"),
-    JsonSubTypes.Type(value = AnnualMember::class, name = "ANNUAL"),
-    JsonSubTypes.Type(value = MonthlyMember::class, name = "MONTHLY")
-)
-interface MemberDetail
-
-data class LimitedEntriesMember(
-    val totalEntries: Int,
-    val usedEntries: Int
-): MemberDetail
-
-data class AnnualMember (
-    val startedDate: LocalDate,
-    val expiredDate: LocalDate
-): MemberDetail
-
-data class MonthlyMember (
-    val startedDate: LocalDate,
-    val expiredDate: LocalDate
-): MemberDetail
-
-class NormalMember : MemberDetail
-
-enum class MemberType {
-    NORMAL,
-    LIMITED_ENTRIES,
-    MONTHLY,
-    ANNUAL
-}
 
 @JsonTypeInfo(use= JsonTypeInfo.Id.NAME, include= JsonTypeInfo.As.PROPERTY, property="memberType")
 @JsonSubTypes(
@@ -54,10 +24,48 @@ enum class MemberType {
 interface MemberSource
 
 data class WechatMember (
-    val openid: String
+    val openid: String,
+    val nickName: String,
+    val gender: String
 ): MemberSource
 
 enum class MemberSourceType {
     OFFLINE,
     WECHAT
+}
+
+interface MemberDetail {
+    val memberType: MemberType
+}
+
+interface ContractMemberDetail: MemberDetail {
+    @get:JsonSerialize(using = ExpiryDateSerializer::class)
+    val expiryDate: LocalDate
+}
+
+class ExpiryDateSerializer: JsonSerializer<LocalDate>() {
+    override fun serialize(value: LocalDate, gen: JsonGenerator, serializers: SerializerProvider?) {
+        gen.writeString(value.format(CHECKIN_DATE_FORMMATER))
+    }
+}
+
+data class YearlyMember (
+    override val expiryDate: LocalDate,
+    override val memberType: MemberType = MemberType.YEARLY
+): ContractMemberDetail
+
+data class MonthlyMember (
+    override val expiryDate: LocalDate,
+    override val memberType: MemberType = MemberType.MONTHLY
+): ContractMemberDetail
+
+data class NormalMember(
+    val remainingEntries: Long,
+    override val memberType: MemberType = MemberType.NORMAL
+): MemberDetail
+
+enum class MemberType {
+    NORMAL,
+    MONTHLY,
+    YEARLY
 }

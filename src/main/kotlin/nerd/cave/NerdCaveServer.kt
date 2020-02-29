@@ -2,6 +2,8 @@ package nerd.cave
 
 import io.vertx.core.Vertx
 import nerd.cave.component.LifeCycle
+import nerd.cave.service.checkin.CheckInNumberGeneratorMongoImpl
+import nerd.cave.service.checkin.CheckInServiceImpl
 import nerd.cave.service.member.MemberServiceImpl
 import nerd.cave.service.payment.PaymentServiceImpl
 import nerd.cave.store.config.MongoConfig
@@ -18,18 +20,20 @@ class NerdCaveServer(private val environment: Environment): LifeCycle {
         private val logger = LoggerFactory.getLogger(NerdCaveServer::class.java)
     }
 
-    val vertx = Vertx.vertx()
-    val executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
-    val clock = Clock.system(ZoneOffset.ofHours(8))
-    val store = MongoStoreService(MongoConfig.forEnv(environment), clock)
-    val paymentService = PaymentServiceImpl(store)
-    val memberService = MemberServiceImpl(clock)
-    val webClient = WebClient(executor)
-    val webServer = WebServer(environment, vertx, clock, webClient, store, memberService, paymentService)
+    private val vertx = Vertx.vertx()
+    private val executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())
+    private val clock = Clock.system(ZoneOffset.ofHours(8))
+    private val storeService = MongoStoreService(MongoConfig.forEnv(environment), clock)
+    private val paymentService = PaymentServiceImpl(storeService, clock)
+    private val memberService = MemberServiceImpl(clock, storeService)
+    private val checkInNumberGenerator = CheckInNumberGeneratorMongoImpl(storeService)
+    private val checkInService = CheckInServiceImpl(clock, storeService, memberService, checkInNumberGenerator)
+    private val webClient = WebClient(executor)
+    private val webServer = WebServer(environment, vertx, clock, webClient, storeService, memberService, paymentService, checkInService)
 
     override suspend fun start(){
         logger.info("Starting $environment Nerdcave server ")
-        store.start()
+        storeService.start()
         webClient.start()
         webServer.start()
     }
@@ -38,6 +42,6 @@ class NerdCaveServer(private val environment: Environment): LifeCycle {
         logger.info("Stopping Nerdcave server ")
         webServer.stop()
         webClient.stop()
-        store.stop()
+        storeService.stop()
     }
 }

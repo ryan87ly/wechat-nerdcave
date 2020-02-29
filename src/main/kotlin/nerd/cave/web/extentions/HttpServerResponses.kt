@@ -6,19 +6,19 @@ import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import nerd.cave.web.exceptions.HttpHandlerException
 
-fun HttpServerResponse.endIfOpen(content: JsonObject) {
-    putHeader("content-type", "application/json")
-    endIfOpen(HttpResponseStatus.OK, content.encodePrettily())
-}
-
-fun HttpServerResponse.endIfOpen(content: JsonArray) {
-    putHeader("content-type", "application/json")
-    endIfOpen(HttpResponseStatus.OK, content.encodePrettily())
-}
-
 fun HttpServerResponse.endIfOpen(httpException: HttpHandlerException) {
     putHeader("content-type", "text/plain")
     endIfOpen(httpException.statusCode, httpException.message)
+}
+
+fun HttpServerResponse.ok(content: JsonArray) {
+    putHeader("content-type", "application/json")
+    endIfOpen(HttpResponseStatus.OK, content.encodePrettily())
+}
+
+fun HttpServerResponse.ok(content: JsonObject) {
+    putHeader("content-type", "application/json")
+    endIfOpen(HttpResponseStatus.OK, content.encodePrettily())
 }
 
 fun HttpServerResponse.endIfOpen(statusCode: HttpResponseStatus, msg: String? = null) {

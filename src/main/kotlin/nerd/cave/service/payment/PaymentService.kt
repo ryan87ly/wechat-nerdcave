@@ -7,4 +7,6 @@ import nerd.cave.web.wx.payment.WXPayResponse
 interface PaymentService {
     suspend fun newPayment(memberId: String, openid: String, products: List<Product>): Payment
     suspend fun updatePrepay(paymentId: String, prepayId: String, prepayInfo: WXPayResponse): Boolean
+    suspend fun fetchPayment(paymentId: String): Payment?
+    suspend fun redeemPayment(payment: Payment, transactionId: String, paymentCallback: WXPayResponse)
 }

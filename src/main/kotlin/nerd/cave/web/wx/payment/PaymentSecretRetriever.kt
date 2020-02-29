@@ -13,7 +13,7 @@ interface PaymentSecretRetriever {
         fun forEnv(env: Environment, wxConfig: WXConfig, webClient: WebClient): PaymentSecretRetriever {
             return when(env) {
                 Environment.UAT -> SandboxPaymentSecretRetriever(wxConfig, webClient)
-                Environment.LOCAL -> SandboxPaymentSecretRetriever(wxConfig, webClient)
+                Environment.LOCAL -> ProdPaymentSecretRetriever(wxConfig)
                 Environment.PROD -> ProdPaymentSecretRetriever(wxConfig)
             }
         }
@@ -45,7 +45,7 @@ class SandboxPaymentSecretRetriever(private val wxConfig: WXConfig, private val 
         val signature = sign(wxConfig.paymentSecret, *variablesToBeSigned.toTypedArray())
         val variables = variablesToBeSigned.plus("sign" to signature)
         val response = webClient.postXml(GET_SIGN_KEY_URL, variables.toMap()).toWXPaymentResponse()
-        if (response.isSuccess) {
+        if (response.isResponseSuccess) {
             paymentSecret = response[SANDBOX_SIGNKEY]
             return paymentSecret!!
         } else {

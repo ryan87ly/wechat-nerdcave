@@ -7,6 +7,7 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.jsonObjectOf
 import io.vertx.kotlin.coroutines.dispatcher
 import nerd.cave.model.session.SESSION_COOKIE_NAME
+import nerd.cave.service.member.MemberService
 import nerd.cave.store.MemberStoreService
 import nerd.cave.store.SessionStoreService
 import nerd.cave.web.endpoints.HttpEndpoint
@@ -14,6 +15,8 @@ import nerd.cave.web.exceptions.BadRequestException
 import nerd.cave.web.exceptions.ForbiddenException
 import nerd.cave.web.extentions.coroutine
 import nerd.cave.web.extentions.endIfOpen
+import nerd.cave.web.extentions.getMandatoryString
+import nerd.cave.web.extentions.ok
 import nerd.cave.web.wx.WXWebClient
 import nerd.cave.web.wx.isSuccess
 import org.slf4j.LoggerFactory
@@ -22,7 +25,9 @@ class LoginEndpoints(
     vertx: Vertx,
     private val wxWebClient: WXWebClient,
     private val sessionStoreService: SessionStoreService,
-    private val memberStoreService: MemberStoreService): HttpEndpoint {
+    private val memberStoreService: MemberStoreService,
+    private val memberService: MemberService
+): HttpEndpoint {
 
     companion object {
         private val logger = LoggerFactory.getLogger(LoginEndpoints::class.java)
@@ -34,7 +39,9 @@ class LoginEndpoints(
 
 
     private suspend fun userLogin(ctx: RoutingContext) {
-        val code = ctx.bodyAsJson.getString("code") ?: throw ForbiddenException("Empty code param")
+        val code = ctx.bodyAsJson.getMandatoryString("code")
+        val nickName = ctx.bodyAsJson.getMandatoryString("nickName")
+        val gender = ctx.bodyAsJson.getMandatoryString("gender")
         logger.info("Login code $code")
         val requestResponse = wxWebClient.code2Session(code)
         if (!requestResponse.isSuccess()) {
@@ -42,13 +49,14 @@ class LoginEndpoints(
         } else {
             val openid = requestResponse.getString("openid")
             logger.info("code: [$code], openid: [$openid]")
-            val member = memberStoreService.getOrCreateWechatMember(openid)
-            val session = sessionStoreService.newSession(member.memberId)
+            val member = memberStoreService.getOrCreateWechatMember(openid, nickName, gender)
+            val session = sessionStoreService.newSession(member.id)
+            val memberDetail = memberService.getMemberDetail(member.id)
             ctx.addCookie(Cookie.cookie(SESSION_COOKIE_NAME, session.id))
                 .response()
-                .endIfOpen(jsonObjectOf(
-                    "memberType" to member.memberType,
-                    "memberDetail" to member.memberDetail
+                .ok(jsonObjectOf(
+                    "memberType" to memberDetail.memberType,
+                    "memberDetail" to memberDetail
                 )
             )
         }

@@ -27,12 +27,12 @@ sealed class WXConfig(val paymentHost: String, val notifyUrl: String) {
 
 object Local: WXConfig(
     "https://api.mch.weixin.qq.com/sandboxnew/pay",
-    "https://www.nerdcave.club/api/notification/paymentcallback") {
+    "https://www.nerdcave.club/api/notification/payment") {
 }
 
 object UAT: WXConfig(
     "https://api.mch.weixin.qq.com/sandboxnew/pay",
-    "https://www.nerdcave.club/api/notification/paymentcallback") {
+    "https://www.nerdcave.club/api/notification/payment") {
 }
 
-object Prod: WXConfig("https://api.mch.weixin.qq.com/pay", "https://www.nerdcave.club/api/notification/paymentcallback")
+object Prod: WXConfig("https://api.mch.weixin.qq.com/pay", "https://www.nerdcave.club/api/notification/payment")
