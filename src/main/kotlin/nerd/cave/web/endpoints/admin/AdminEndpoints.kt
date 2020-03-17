@@ -52,9 +52,9 @@ class AdminEndpoints(
     override val router = Router.router(vertx).coroutine(vertx.dispatcher(), logger).apply {
         post("/login") { adminLogin(it) }
         route(adminSessionHandler.handler)
-        get("/orders") { retrieveOfflineOrders(it) }
-        get("/orders/:startTime") { retrieveOfflineOrders(it) }
-        get("/orders/:startTime/:endTime") { retrieveOfflineOrders(it) }
+        get("/orders") { retrieveOrders(it) }
+        get("/orders/:startTime") { retrieveOrders(it) }
+        get("/orders/:startTime/:endTime") { retrieveOrders(it) }
         post("/offlineorder/approve") { approveOfflineOrder(it) }
         post("/branch/") { newBranch(it) }
         post("/branch/deactivate/:id") { deactivateBranch(it) }
@@ -78,13 +78,13 @@ class AdminEndpoints(
             )
     }
 
-    private suspend fun retrieveOfflineOrders(ctx: RoutingContext) {
+    private suspend fun retrieveOrders(ctx: RoutingContext) {
         val startTime = ctx.request().params().get("startTime")?.toLocalDateTime()
-        val endTime = ctx.request().params().get("end")?.toLocalDateTime()
+        val endTime = ctx.request().params().get("endTime")?.toLocalDateTime()
         val enrichedOrders = orderService.orders(startTime, endTime)
         ctx.response().ok(
             jsonArrayOf(
-                enrichedOrders.toTypedArray()
+                *enrichedOrders.toTypedArray()
             )
         )
     }

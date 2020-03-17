@@ -11,13 +11,21 @@
   },
   "servers": [
     {
-      "url": "https://www.nerdcave.club/api"
+      "url": "https://www.nerdcave.club"
     },
     {
-      "url": "http://localhost:8080/api"
+      "url": "http://localhost:8080"
     }
   ],
   "tags": [
+    {
+      "name": "admin_login",
+      "description": "Admin Login"
+    },
+    {
+      "name": "admin_order",
+      "description": "Admin order operations"
+    },
     {
       "name": "login",
       "description": "Login operation"
@@ -52,7 +60,362 @@
     }
   ],
   "paths": {
-    "/login": {
+    "/admin/login": {
+      "post": {
+        "tags": [
+          "admin_login"
+        ],
+        "summary": "Admin Login with username password",
+        "operationId": "admin login",
+        "requestBody": {
+          "description": "Admin Login",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successful login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "login failed"
+          }
+        }
+      }
+    },
+    "/admin/orders": {
+      "get": {
+        "tags": [
+          "admin_order"
+        ],
+        "summary": "Get all orders",
+        "operationId": "admin orders",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "examples": {
+                  "OFFLINE_ORDER_UNAPPROVED": {
+                    "value": {
+                      "id": "5e70dbf3057201388c5716a3",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200317221723",
+                      "productType": "YEARLY_MEMBER_FEE",
+                      "description": "年卡",
+                      "branchName": "NC 1",
+                      "orderType": "OFFLINE",
+                      "status": "UNAPPROVED",
+                      "approvalInfo": null
+                    }
+                  },
+                  "OFFLINE_ORDER_APPROVED": {
+                    "value": {
+                      "id": "5e67a164b593d05c529a03fa",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200310221708",
+                      "productType": "MULTI_ENTRIES_FEE",
+                      "description": "Product-1 10 entries",
+                      "branchName": "id-5e4024b000653065cc851f8f",
+                      "orderType": "OFFLINE",
+                      "status": "APPROVED",
+                      "approvalInfo": {
+                        "approverId": "123",
+                        "approverName": "Admin 1",
+                        "time": "20200310224132"
+                      }
+                    }
+                  },
+                  "WX_ORDER_COMPLTED": {
+                    "value": {
+                      "id": "5e6e43308d43c85e3fa0fcb9",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200315230104",
+                      "productType": "SINGLE_ENTRY_FEE",
+                      "description": "单次票",
+                      "branchName": "NC 1",
+                      "orderType": "WECHAT",
+                      "status": "WX_PAYMENT_COMPLETED",
+                      "approvalInfo": null
+                    }
+                  },
+                  "WX_ORDER_PENDING_PAYMENT": {
+                    "value": {
+                      "id": "5e6e43308d43c85e3fa0fcb9",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200315230104",
+                      "productType": "EQUIPMENT_RENTAL_FEE",
+                      "description": "租鞋子",
+                      "branchName": "NC 1",
+                      "orderType": "WECHAT",
+                      "status": "PENDING_WX_PAYMENT",
+                      "approvalInfo": null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/orders/{startTime}": {
+      "get": {
+        "tags": [
+          "admin_order"
+        ],
+        "summary": "Get orders from startTime(inclusive)",
+        "operationId": "admin orders from startTime",
+        "parameters": [
+          {
+            "name": "startTime",
+            "in": "path",
+            "description": "start time inclusive",
+            "required": true,
+            "example": "20200317221723",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "examples": {
+                  "OFFLINE_ORDER_UNAPPROVED": {
+                    "value": {
+                      "id": "5e70dbf3057201388c5716a3",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200317221723",
+                      "productType": "YEARLY_MEMBER_FEE",
+                      "description": "年卡",
+                      "branchName": "NC 1",
+                      "orderType": "OFFLINE",
+                      "status": "UNAPPROVED",
+                      "approvalInfo": null
+                    }
+                  },
+                  "OFFLINE_ORDER_APPROVED": {
+                    "value": {
+                      "id": "5e67a164b593d05c529a03fa",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200310221708",
+                      "productType": "MULTI_ENTRIES_FEE",
+                      "description": "Product-1 10 entries",
+                      "branchName": "id-5e4024b000653065cc851f8f",
+                      "orderType": "OFFLINE",
+                      "status": "APPROVED",
+                      "approvalInfo": {
+                        "approverId": "123",
+                        "approverName": "Admin 1",
+                        "time": "20200310224132"
+                      }
+                    }
+                  },
+                  "WX_ORDER_COMPLTED": {
+                    "value": {
+                      "id": "5e6e43308d43c85e3fa0fcb9",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200315230104",
+                      "productType": "SINGLE_ENTRY_FEE",
+                      "description": "单次票",
+                      "branchName": "NC 1",
+                      "orderType": "WECHAT",
+                      "status": "WX_PAYMENT_COMPLETED",
+                      "approvalInfo": null
+                    }
+                  },
+                  "WX_ORDER_PENDING_PAYMENT": {
+                    "value": {
+                      "id": "5e6e43308d43c85e3fa0fcb9",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200315230104",
+                      "productType": "EQUIPMENT_RENTAL_FEE",
+                      "description": "租鞋子",
+                      "branchName": "NC 1",
+                      "orderType": "WECHAT",
+                      "status": "PENDING_WX_PAYMENT",
+                      "approvalInfo": null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/orders/{startTime}/{endTime}": {
+      "get": {
+        "tags": [
+          "admin_order"
+        ],
+        "summary": "Get orders from startTime(inclusive) to endTime(exclusive)",
+        "operationId": "admin orders from startTime to endTime",
+        "parameters": [
+          {
+            "name": "startTime",
+            "in": "path",
+            "description": "start time inclusive",
+            "required": true,
+            "example": "20200317221723",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endTime",
+            "in": "path",
+            "description": "start time inclusive",
+            "required": true,
+            "example": "20200318221723",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "examples": {
+                  "OFFLINE_ORDER_UNAPPROVED": {
+                    "value": {
+                      "id": "5e70dbf3057201388c5716a3",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200317221723",
+                      "productType": "YEARLY_MEMBER_FEE",
+                      "description": "年卡",
+                      "branchName": "NC 1",
+                      "orderType": "OFFLINE",
+                      "status": "UNAPPROVED",
+                      "approvalInfo": null
+                    }
+                  },
+                  "OFFLINE_ORDER_APPROVED": {
+                    "value": {
+                      "id": "5e67a164b593d05c529a03fa",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200310221708",
+                      "productType": "MULTI_ENTRIES_FEE",
+                      "description": "Product-1 10 entries",
+                      "branchName": "id-5e4024b000653065cc851f8f",
+                      "orderType": "OFFLINE",
+                      "status": "APPROVED",
+                      "approvalInfo": {
+                        "approverId": "123",
+                        "approverName": "Admin 1",
+                        "time": "20200310224132"
+                      }
+                    }
+                  },
+                  "WX_ORDER_COMPLTED": {
+                    "value": {
+                      "id": "5e6e43308d43c85e3fa0fcb9",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200315230104",
+                      "productType": "SINGLE_ENTRY_FEE",
+                      "description": "单次票",
+                      "branchName": "NC 1",
+                      "orderType": "WECHAT",
+                      "status": "WX_PAYMENT_COMPLETED",
+                      "approvalInfo": null
+                    }
+                  },
+                  "WX_ORDER_PENDING_PAYMENT": {
+                    "value": {
+                      "id": "5e6e43308d43c85e3fa0fcb9",
+                      "memberName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "time": "20200315230104",
+                      "productType": "EQUIPMENT_RENTAL_FEE",
+                      "description": "租鞋子",
+                      "branchName": "NC 1",
+                      "orderType": "WECHAT",
+                      "status": "PENDING_WX_PAYMENT",
+                      "approvalInfo": null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/offlineorder/approve": {
+      "post": {
+        "tags": [
+          "admin_order"
+        ],
+        "summary": "Approve offline order",
+        "description": "Approve offline order",
+        "operationId": "Approve offline order",
+        "requestBody": {
+          "description": "Approve offline order",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveOfflineOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          },
+          "401": {
+            "description": "unauthorized"
+          }
+        }
+      }
+    },
+    "/api/login": {
       "post": {
         "tags": [
           "login"
@@ -124,7 +487,7 @@
         "x-codegen-request-body-name": "body"
       }
     },
-    "/member/info": {
+    "/api/member/info": {
       "get": {
         "tags": [
           "member"
@@ -191,7 +554,7 @@
         }
       }
     },
-    "/product/all": {
+    "/api/product/all": {
       "get": {
         "tags": [
           "product"
@@ -305,7 +668,7 @@
         }
       }
     },
-    "/payment/placeOrder": {
+    "/api/payment/placeOrder": {
       "post": {
         "tags": [
           "payment"
@@ -339,7 +702,7 @@
         "x-codegen-request-body-name": "body"
       }
     },
-    "/payment/info/{paymentId}": {
+    "/api/payment/info/{paymentId}": {
       "get": {
         "tags": [
           "payment"
@@ -372,7 +735,7 @@
         }
       }
     },
-    "/offlineorder/placeOrder": {
+    "/api/offlineorder/placeOrder": {
       "post": {
         "tags": [
           "offlineorder"
@@ -406,7 +769,7 @@
         "x-codegen-request-body-name": "body"
       }
     },
-    "/checkIn": {
+    "/api/checkIn": {
       "post": {
         "tags": [
           "checkIn"
@@ -446,7 +809,7 @@
         }
       }
     },
-    "/checkIn/token/{date}": {
+    "/api/checkIn/token/{date}": {
       "get": {
         "tags": [
           "checkIn"
@@ -486,7 +849,7 @@
         }
       }
     },
-    "/checkIn/history/{startDate}": {
+    "/api/checkIn/history/{startDate}": {
       "get": {
         "tags": [
           "checkIn"
@@ -524,7 +887,7 @@
         }
       }
     },
-    "/checkIn/history/{startDate}/{endDate}": {
+    "/api/checkIn/history/{startDate}/{endDate}": {
       "get": {
         "tags": [
           "checkIn"
@@ -572,7 +935,93 @@
         }
       }
     },
-    "/branch/all": {
+    "/api/checkIn/ranking/{startDate}": {
+      "get": {
+        "tags": [
+          "checkIn"
+        ],
+        "summary": "Member check in ranking from startDate(inclusive)",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "Member Check In Ranking",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "path",
+            "description": "start date inclusive",
+            "required": true,
+            "example": "20200220",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "ranking": 1,
+                  "totalMembers": 2
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/checkIn/ranking/{startDate}/{endDate}": {
+      "get": {
+        "tags": [
+          "checkIn"
+        ],
+        "summary": "Member check in ranking from startDate(inclusive) to endDate(exclusive)",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "Member Check In Ranking to end date",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "path",
+            "description": "start date inclusive",
+            "required": true,
+            "example": "20200220",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "path",
+            "description": "start date exclusive",
+            "required": true,
+            "example": "20200301",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "ranking": 1,
+                  "totalMembers": 2
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/branch/all": {
       "get": {
         "tags": [
           "branch"
@@ -593,7 +1042,7 @@
         }
       }
     },
-    "/branch": {
+    "/api/branch": {
       "post": {
         "tags": [
           "branch"
@@ -634,7 +1083,7 @@
         }
       }
     },
-    "/branch/{branchId}": {
+    "/api/branch/{branchId}": {
       "get": {
         "tags": [
           "branch"
@@ -669,7 +1118,7 @@
         }
       }
     },
-    "/disclaimer/hasSigned": {
+    "/api/disclaimer/hasSigned": {
       "get": {
         "tags": [
           "disclaimer"
@@ -693,7 +1142,7 @@
         }
       }
     },
-    "/disclaimer/sign": {
+    "/api/disclaimer/sign": {
       "post": {
         "tags": [
           "disclaimer"
@@ -729,6 +1178,40 @@
   },
   "components": {
     "schemas": {
+      "AdminLoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminInfo": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "SUPER_USER",
+              "BRANCH_MAINTAINER"
+            ]
+          }
+        }
+      },
+      "ApproveOfflineOrderRequest": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string"
+          }
+        }
+      },
       "Id": {
         "type": "object",
         "properties": {

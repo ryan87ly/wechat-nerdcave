@@ -47,7 +47,11 @@ class ProductEndpoints(
 
     private suspend fun allProducts(ctx: RoutingContext) {
         val products = productStoreService.fetchAll()
-        ctx.response().ok(jsonArrayOf(products.map { it.toJson() }))
+        ctx.response().ok(
+            jsonArrayOf(
+                *products.map { it.toJson() }.toTypedArray()
+            )
+        )
     }
 
     private suspend fun productById(ctx: RoutingContext) {

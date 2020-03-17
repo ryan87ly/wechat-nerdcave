@@ -31,7 +31,11 @@ class BranchEndpoints(
 
     private suspend fun allBranches(ctx: RoutingContext) {
         val branches = branchService.allBranchClientInfo()
-        ctx.response().ok(jsonArrayOf(*branches.toTypedArray()))
+        ctx.response().ok(
+            jsonArrayOf(
+                *branches.toTypedArray()
+            )
+        )
     }
 
     private suspend fun branchById(ctx: RoutingContext) {
