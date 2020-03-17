@@ -51,7 +51,6 @@ class GreetingEndpoints(vertx: Vertx, private val wxConfig: WXConfig, webClient:
 
     private suspend fun prepay(ctx: RoutingContext) {
         val remoteHost = ctx.request().connection().remoteAddress().host()
-        println("request host $remoteHost")
         val openid = ctx.request().params().get("openid")
         val response = wxPayClient.placeUnifiedOrder(openid, UUID.randomUUID().toString(), "test", 201, remoteHost)
         ctx.response().end(

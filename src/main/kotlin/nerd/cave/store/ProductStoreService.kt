@@ -1,7 +1,7 @@
 package nerd.cave.store
 
 import nerd.cave.component.LifeCycle
-import nerd.cave.model.product.Product
+import nerd.cave.model.api.product.Product
 
 interface ProductStoreService: LifeCycle {
     suspend fun fetchAll(): List<Product>

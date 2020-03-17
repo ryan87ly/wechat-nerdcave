@@ -1,12 +1,12 @@
 package nerd.cave.service.checkin
 
-import nerd.cave.model.member.ContractMemberDetail
-import nerd.cave.model.member.NormalMember
-import nerd.cave.model.token.Token
-import nerd.cave.model.token.toTokenDateFormat
+import nerd.cave.model.api.member.*
+import nerd.cave.model.api.token.Token
+import nerd.cave.service.branch.BranchService
 import nerd.cave.service.member.MemberService
 import nerd.cave.store.StoreService
 import nerd.cave.util.MongoIdGenerator
+import nerd.cave.util.toFormattedString
 import nerd.cave.web.exceptions.BadRequestException
 import java.time.Clock
 import java.time.LocalDate
@@ -16,6 +16,7 @@ class CheckInServiceImpl(
     private val clock: Clock,
     storeService: StoreService,
     private val memberService: MemberService,
+    private val branchService: BranchService,
     private val checkInNumberGenerator: CheckInNumberGenerator
 ): CheckInService {
 
@@ -24,15 +25,18 @@ class CheckInServiceImpl(
     private val tokenStoreService by lazy { storeService.tokenStoreService }
     private val idGenerator = MongoIdGenerator()
 
-    override suspend fun checkIn(memberId: String, branchId: String): Token? {
+    override suspend fun checkIn(member: Member, branchId: String): Token {
         val branch = branchStoreService.fetchById(branchId) ?: throw BadRequestException("Unable to find branch [$branchId]")
-        val checkInDate = ZonedDateTime.now(clock).toLocalDate()
-        val token = tokenStoreService.fetchToken(memberId, checkInDate)
-        if (token != null) throw BadRequestException("Member has already checked in on ${checkInDate.toTokenDateFormat()}")
-        return when(val memberDetail = memberService.getMemberDetail(memberId)) {
-                is ContractMemberDetail -> createTokenForContractMember(memberId, branch.id, checkInDate)
-                is NormalMember -> if (memberDetail.remainingEntries > 0) createTokenFromTicket(memberId, branch.id, checkInDate) else null
-                else -> null
+        val now = ZonedDateTime.now(clock).toLocalDateTime()
+        if (branchService.isBranchOpen(branch, now)) throw BadRequestException("Branch [$branchId] is closed")
+        val checkInDate = now.toLocalDate()
+        val token = tokenStoreService.fetchToken(member.id, checkInDate)
+        if (token != null) throw BadRequestException("Member has already checked in on ${checkInDate.toFormattedString()}")
+        return when(val effectiveMemberDetail = memberService.getEffectiveMemberDetail(member)) {
+                is UnlimitedEntriesMemberDetail -> createTokenForUnlimitedMember(member.id, branch.id, checkInDate)
+                is MultiEntriesMember -> createTokenForMultiEntriesMember(member, branch.id, checkInDate)
+                is NormalMember -> if (effectiveMemberDetail.remainingEntries > 0) createTokenFromTicket(member.id, branch.id, checkInDate) else throw BadRequestException("No available ticket found!")
+                else -> throw BadRequestException("Unsupported member")
             }
     }
 
@@ -40,7 +44,15 @@ class CheckInServiceImpl(
         return tokenStoreService.fetchToken(memberId, checkInDate)
     }
 
-    private suspend fun createTokenFromTicket(memberId: String, branchId: String, checkInDate: LocalDate): Token? {
+    private suspend fun createTokenForMultiEntriesMember(member: Member, branchId: String, checkInDate: LocalDate): Token {
+        return if (memberService.spendEntry(member)) {
+            val token = generateToken(member.id, branchId, false, checkInDate)
+            tokenStoreService.insertToken(token)
+            token
+        } else throw BadRequestException("Insufficient entry!")
+    }
+
+    private suspend fun createTokenFromTicket(memberId: String, branchId: String, checkInDate: LocalDate): Token {
         return ticketStoreService.latestNotUsedTicket(memberId)
             ?.let {
                 val token = generateToken(memberId, branchId, it.hasEquipment, checkInDate)
@@ -48,12 +60,12 @@ class CheckInServiceImpl(
                     tokenStoreService.insertToken(token)
                     token
                 } else {
-                    null
+                    throw BadRequestException("No available ticket found!")
                 }
-            }
+            } ?: throw BadRequestException("No available ticket found!")
     }
 
-    private suspend fun createTokenForContractMember(memberId: String, branchId: String, checkInDate: LocalDate): Token {
+    private suspend fun createTokenForUnlimitedMember(memberId: String, branchId: String, checkInDate: LocalDate): Token {
         val token = generateToken(memberId, branchId, false, checkInDate)
         tokenStoreService.insertToken(token)
         return token
@@ -69,7 +81,7 @@ class CheckInServiceImpl(
             hasEquipment,
             checkInNumber,
             now,
-            checkInDate.toTokenDateFormat()
+            checkInDate
         )
     }
 
@@ -77,7 +89,9 @@ class CheckInServiceImpl(
         return tokenStoreService.history(memberId, startDateInclusive, endDateExclusive)
     }
 
-
+    override suspend fun countByMemberId(startDateInclusive: LocalDate, endDateExclusive: LocalDate?): List<Pair<String, Long>> {
+        return tokenStoreService.countByMemberId(startDateInclusive, endDateExclusive)
+    }
 
 
 }

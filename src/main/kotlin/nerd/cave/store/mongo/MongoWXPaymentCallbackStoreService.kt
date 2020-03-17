@@ -1,6 +1,6 @@
 package nerd.cave.store.mongo
 
-import nerd.cave.model.payment.WXPaymentCallback
+import nerd.cave.model.api.order.wechat.WXPaymentCallback
 import nerd.cave.store.WXPaymentCallbackStoreService
 
 class MongoWXPaymentCallbackStoreService(mongoStoreService: MongoStoreService) : WXPaymentCallbackStoreService {

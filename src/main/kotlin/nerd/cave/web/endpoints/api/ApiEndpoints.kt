@@ -3,19 +3,13 @@ package nerd.cave.web.endpoints.api
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
+import nerd.cave.service.branch.BranchService
 import nerd.cave.service.checkin.CheckInService
+import nerd.cave.service.holiday.HolidayService
 import nerd.cave.service.member.MemberService
-import nerd.cave.service.payment.PaymentService
+import nerd.cave.service.order.OrderService
 import nerd.cave.store.StoreService
 import nerd.cave.web.endpoints.HttpEndpoint
-import nerd.cave.web.endpoints.api.action.MemberEndpoints
-import nerd.cave.web.endpoints.api.branch.BranchEndpoints
-import nerd.cave.web.endpoints.api.checkin.CheckInEndpoints
-import nerd.cave.web.endpoints.api.disclaimer.DisclaimerEndpoints
-import nerd.cave.web.endpoints.api.login.LoginEndpoints
-import nerd.cave.web.endpoints.api.payment.PaymentEndpoints
-import nerd.cave.web.endpoints.api.product.ProductEndpoints
-import nerd.cave.web.endpoints.api.notification.WXNotificationEndpoints
 import nerd.cave.web.session.NerdCaveSessionHandler
 import nerd.cave.web.wx.WXWebClient
 import nerd.cave.web.wx.payment.PaymentSecretRetriever
@@ -31,19 +25,22 @@ class ApiEndpoints (
     storeService: StoreService,
     sessionHandler: NerdCaveSessionHandler,
     memberService: MemberService,
-    paymentService: PaymentService,
-    checkInService: CheckInService
+    checkInService: CheckInService,
+    orderService: OrderService,
+    branchService: BranchService,
+    holidayService: HolidayService
 ): HttpEndpoint {
 
     override val router: Router = Router.router(vertx).apply {
         mountSubRouter("/login", LoginEndpoints(vertx, wxWebClient, storeService.sessionStoreService, storeService.memberStoreService, memberService).router)
-        mountSubRouter("/notification", WXNotificationEndpoints(vertx, clock, paymentSecretRetriever, storeService.wxPaymentCallbackStoreService, paymentService).router)
+        mountSubRouter("/notification", WXNotificationEndpoints(vertx, clock, paymentSecretRetriever, storeService.wxPaymentCallbackStoreService, orderService).router)
         mountSubRouter("/member", MemberEndpoints(vertx, sessionHandler, memberService).router)
         mountSubRouter("/checkIn", CheckInEndpoints(vertx, sessionHandler, storeService, checkInService).router)
-        mountSubRouter("/branch", BranchEndpoints(vertx, storeService.branchStoreService, sessionHandler).router)
-        mountSubRouter("/product", ProductEndpoints(vertx, storeService.productStoreService, sessionHandler).router)
-        mountSubRouter("/payment", PaymentEndpoints(vertx, clock, wxPayClient, sessionHandler, paymentSecretRetriever, memberService, paymentService, storeService.productStoreService).router)
-        mountSubRouter("/disclaimer", DisclaimerEndpoints(vertx, storeService.disclaimerStoreService, sessionHandler).router)
+        mountSubRouter("/branch", BranchEndpoints(vertx, sessionHandler, branchService).router)
+        mountSubRouter("/product", ProductEndpoints(vertx, sessionHandler, clock, storeService.productStoreService, holidayService).router)
+        mountSubRouter("/payment", PaymentEndpoints(vertx, clock, wxPayClient, sessionHandler, paymentSecretRetriever, memberService, orderService, branchService, storeService).router)
+        mountSubRouter("/disclaimer", DisclaimerEndpoints(vertx, sessionHandler, storeService).router)
+        mountSubRouter("/offlineorder", OfflineOrderEndpoints(vertx, sessionHandler, storeService, orderService).router)
         options().handler { ctx ->
             ctx.response().apply {
                 headers().apply {

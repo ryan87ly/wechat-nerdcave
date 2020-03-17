@@ -7,6 +7,7 @@ import nerd.cave.Environment
 
 interface MongoConfig {
     val mongoClientSetting: MongoClientSettings
+    val dbName:String get() = "nerdcave"
 
     companion object {
         fun forEnv(env: Environment): MongoConfig {

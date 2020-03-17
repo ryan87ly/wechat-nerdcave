@@ -1,8 +1,8 @@
 package nerd.cave.web.session
 
 import io.vertx.ext.web.RoutingContext
-import nerd.cave.model.member.Member
-import nerd.cave.model.session.SESSION_COOKIE_NAME
+import nerd.cave.model.api.member.Member
+import nerd.cave.model.api.session.SESSION_COOKIE_NAME
 import nerd.cave.store.MemberStoreService
 import nerd.cave.store.SessionStoreService
 import nerd.cave.web.exceptions.BadRequestException
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 
 const val SESSION_MEMBER_KEY = "NERDCAVE_MEMBER"
 
-class NerdCaveSessionHandlerImpl(private val memberStoreService: MemberStoreService, private val  sessionStoreService: SessionStoreService): NerdCaveSessionHandler {
+class NerdCaveSessionHandlerImpl(private val memberStoreService: MemberStoreService, private val sessionStoreService: SessionStoreService): NerdCaveSessionHandler {
     companion object {
         private val logger = LoggerFactory.getLogger(NerdCaveSessionHandlerImpl::class.java)
     }
@@ -24,7 +24,7 @@ class NerdCaveSessionHandlerImpl(private val memberStoreService: MemberStoreServ
             val memberId = sessionStoreService.retrieveSession(sessionId)?.memberId
                 ?: throw UnauthorizedException("Session id is not valid. Please call login api to retrieve valid session")
             logger.debug("member[$memberId] is make [${ctx.request().method()}] on ${ctx.request().path()}")
-            memberStoreService.findMember(memberId)
+            memberStoreService.fetchById(memberId)
                 ?.let {
                     ctx.put(SESSION_MEMBER_KEY, it)
                     ctx.next()

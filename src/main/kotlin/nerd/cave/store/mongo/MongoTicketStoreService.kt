@@ -1,10 +1,8 @@
 package nerd.cave.store.mongo
 
 import com.mongodb.client.model.Filters.and
-import nerd.cave.model.payment.Payment
-import nerd.cave.model.payment.PaymentStatus
-import nerd.cave.model.ticket.Ticket
-import nerd.cave.model.ticket.TicketStatus
+import nerd.cave.model.api.ticket.Ticket
+import nerd.cave.model.api.ticket.TicketStatus
 import nerd.cave.store.TicketStoreService
 import org.litote.kmongo.*
 
@@ -32,7 +30,7 @@ class MongoTicketStoreService(mongoStoreService: MongoStoreService): TicketStore
             setValue(Ticket::status, TicketStatus.USED),
             setValue(Ticket::tokenId, tokenId)
         )
-        return collection.updateOne(query, update).modifiedCount == 1L
+        return collection.updateOne(query, update).succeedUpdateOne()
     }
 
     override suspend fun countNotUsedTickets(memberId: String): Long {

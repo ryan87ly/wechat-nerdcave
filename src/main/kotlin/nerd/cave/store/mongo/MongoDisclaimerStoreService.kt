@@ -1,6 +1,6 @@
 package nerd.cave.store.mongo
 
-import nerd.cave.disclaimer.DisclaimerSignature
+import nerd.cave.model.api.disclaimer.DisclaimerSignature
 import nerd.cave.store.DisclaimerStoreService
 import org.litote.kmongo.eq
 

@@ -48,7 +48,6 @@ internal class AlgorithmTest {
                     .map { it.key to it.value }
                     .toTypedArray()
             )
-        println(s)
         assertEquals(
             signature,
             sign(
@@ -58,5 +57,10 @@ internal class AlgorithmTest {
                     .toTypedArray()
             )
         )
+    }
+
+    @Test
+    fun `verify md5`() {
+        assertEquals("527bd5b5d689e2c32ae974c6229ff785".toUpperCase(), "john".toMD5())
     }
 }

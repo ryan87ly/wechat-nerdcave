@@ -9,7 +9,6 @@ class WXWebClient(val webClient: WebClient, wxConfig: WXConfig) {
 
     suspend fun code2Session(code:String): JsonObject {
         val requestPath = wxQuestPathBuilder.createApiRequestPath(WXApi.CODE_2_SESSION, "js_code" to code, "grand_type" to "authorization_code")
-        println("code2Session path: $requestPath")
         return webClient.getJson(requestPath)
     }
 }

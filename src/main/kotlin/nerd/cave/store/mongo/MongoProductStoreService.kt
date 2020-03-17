@@ -1,7 +1,7 @@
 package nerd.cave.store.mongo
 
 import com.mongodb.client.model.IndexOptions
-import nerd.cave.model.product.Product
+import nerd.cave.model.api.product.Product
 import nerd.cave.store.ProductStoreService
 import java.time.Clock
 

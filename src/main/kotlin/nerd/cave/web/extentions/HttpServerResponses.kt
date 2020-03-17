@@ -28,7 +28,7 @@ fun HttpServerResponse.endIfOpen(statusCode: HttpResponseStatus, msg: String? = 
 private fun HttpServerResponse.endIfOpen(statusCode: Int, msg: String?) {
     if (!this.closed()) {
         setStatusCode(statusCode)
-        end(msg)
+        if (msg != null) end(msg) else end()
     }
 }
 

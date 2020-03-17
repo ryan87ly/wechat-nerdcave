@@ -11,7 +11,7 @@ sealed class WXConfig(val paymentHost: String, val notifyUrl: String) {
 
         fun forEnv(env: Environment): WXConfig {
             return when(env) {
-                Environment.LOCAL -> Local
+                Environment.LOCAL -> Prod
                 Environment.UAT -> UAT
                 Environment.PROD -> Prod
             }

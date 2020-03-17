@@ -1,7 +1,7 @@
 package nerd.cave.store
 
 import nerd.cave.component.LifeCycle
-import nerd.cave.model.ticket.Ticket
+import nerd.cave.model.api.ticket.Ticket
 
 interface TicketStoreService: LifeCycle {
     suspend fun insertTicket(ticket: Ticket)

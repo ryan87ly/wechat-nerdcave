@@ -9,16 +9,20 @@ import io.vertx.kotlin.core.http.closeAwait
 import io.vertx.kotlin.core.http.listenAwait
 import nerd.cave.Environment
 import nerd.cave.component.LifeCycle
+import nerd.cave.service.branch.BranchService
 import nerd.cave.service.checkin.CheckInService
+import nerd.cave.service.holiday.HolidayService
 import nerd.cave.service.member.MemberService
-import nerd.cave.service.payment.PaymentService
+import nerd.cave.service.order.OrderService
 import nerd.cave.store.StoreService
 import nerd.cave.web.client.WebClient
 import nerd.cave.web.endpoints.GreetingEndpoints
+import nerd.cave.web.endpoints.admin.AdminEndpoints
 import nerd.cave.web.endpoints.api.ApiEndpoints
 import nerd.cave.web.endpoints.management.ManagementEndpoints
 import nerd.cave.web.extentions.route
 import nerd.cave.web.handlers.redirect
+import nerd.cave.web.session.AdminAccountSessionHandlerImpl
 import nerd.cave.web.session.NerdCaveSessionHandlerImpl
 import nerd.cave.web.wx.WXWebClient
 import nerd.cave.web.wx.config.WXConfig
@@ -34,8 +38,10 @@ class WebServer(
     private val webClient: WebClient,
     private val storeService: StoreService,
     private val memberService: MemberService,
-    private val paymentService: PaymentService,
-    private val checkInService: CheckInService
+    private val checkInService: CheckInService,
+    private val orderService: OrderService,
+    private val branchService: BranchService,
+    private val holidayService: HolidayService
 ): LifeCycle {
     private val wxConfig = WXConfig.forEnv(environment)
     private val paymentSecretRetriever = PaymentSecretRetriever.forEnv(environment, wxConfig, webClient)
@@ -65,13 +71,15 @@ class WebServer(
     }
 
     private fun buildRouter(): Router {
-        val sessionHandler = NerdCaveSessionHandlerImpl(storeService.memberStoreService, storeService.sessionStoreService)
+        val memberSessionHandler = NerdCaveSessionHandlerImpl(storeService.memberStoreService, storeService.sessionStoreService)
+        val adminSessionHandler = AdminAccountSessionHandlerImpl(clock, storeService.adminAccountStoreService, storeService.adminSessionStoreService)
         return Router.router(vertx).apply {
             route().handler(BodyHandler.create())
             route("/", StaticHandler.create("web").setMaxAgeSeconds(0))
             route("/swagger/*", StaticHandler.create("webroot/swagger").setMaxAgeSeconds(0))
             route("/swagger", redirect("/swagger/"))
-            mountSubRouter("/api", ApiEndpoints(vertx, clock, wxWebClient, wxPayClient, paymentSecretRetriever, storeService, sessionHandler, memberService, paymentService, checkInService).router)
+            mountSubRouter("/admin", AdminEndpoints(vertx, adminSessionHandler, clock, storeService, orderService).router)
+            mountSubRouter("/api", ApiEndpoints(vertx, clock, wxWebClient, wxPayClient, paymentSecretRetriever, storeService, memberSessionHandler, memberService, checkInService, orderService, branchService, holidayService).router)
             mountSubRouter("/greeting", GreetingEndpoints(vertx, wxConfig, webClient, wxPayClient).router)
             mountSubRouter("/mnt", ManagementEndpoints(vertx).router)
         }

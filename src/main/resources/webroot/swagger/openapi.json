@@ -35,6 +35,10 @@
       "description": "wechat payment"
     },
     {
+      "name": "offlineorder",
+      "description": "线下订单"
+    },
+    {
       "name": "branch",
       "description": "分店信息"
     },
@@ -141,7 +145,19 @@
                       "memberType": "NORMAL",
                       "memberDetail": {
                         "memberType": "NORMAL",
-                        "remainingEntries": 10
+                        "remainingEntries": 1
+                      }
+                    }
+                  },
+                  "MultiEntriesMember": {
+                    "value": {
+                      "memberType": "MULTI_ENTRIES",
+                      "memberDetail": {
+                        "memberType": "MULTI_ENTRIES",
+                        "usedEntries": 1,
+                        "totalEntries": 10,
+                        "validFrom": "20200101",
+                        "validUntil": "20200301"
                       }
                     }
                   },
@@ -150,7 +166,8 @@
                       "memberType": "YEARLY",
                       "memberDetail": {
                         "memberType": "YEARLY",
-                        "expiryDate": "20210228"
+                        "validFrom": "20200101",
+                        "validUntil": "20201231"
                       }
                     }
                   },
@@ -159,7 +176,8 @@
                       "memberType": "MONTHLY",
                       "memberDetail": {
                         "memberType": "MONTHLY",
-                        "expiryDate": "20210228"
+                        "validFrom": "20200101",
+                        "validUntil": "20200131"
                       }
                     }
                   }
@@ -186,7 +204,100 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Produt"
+                  }
+                },
+                "examples": {
+                  "MULTI_ENTRIES_FEE": {
+                    "value": {
+                      "id": "123",
+                      "productType": "MULTI_ENTRIES_FEE",
+                      "detail": {
+                        "productType": "MULTI_ENTRIES_FEE",
+                        "entries": "10,",
+                        "validMonths": 3
+                      },
+                      "description": "Product-1 10 entries",
+                      "regularPrice": 200,
+                      "fee": 200,
+                      "discounts": [],
+                      "payViaWechat": false,
+                      "enabled": true
+                    }
+                  },
+                  "EQUIPMENT_RENTAL_FEE": {
+                    "value": {
+                      "id": "234",
+                      "productType": "EQUIPMENT_RENTAL_FEE",
+                      "detail": {
+                        "productType": "EQUIPMENT_RENTAL_FEE"
+                      },
+                      "description": "Boot rentail",
+                      "regularPrice": 1,
+                      "fee": 1,
+                      "discounts": [],
+                      "payViaWechat": true,
+                      "enabled": true
+                    }
+                  },
+                  "MONTHLY_MEMBER_FEE": {
+                    "value": {
+                      "id": "456",
+                      "productType": "MONTHLY_MEMBER_FEE",
+                      "detail": {
+                        "productType": "MONTHLY_MEMBER_FEE",
+                        "months": 1
+                      },
+                      "description": "Product-2 1 month",
+                      "regularPrice": 400,
+                      "fee": 400,
+                      "discounts": [],
+                      "payViaWechat": false,
+                      "enabled": true
+                    }
+                  },
+                  "YEARLY_MEMBER_FEE": {
+                    "value": {
+                      "id": "789",
+                      "productType": "YEARLY_MEMBER_FEE",
+                      "detail": {
+                        "productType": "YEARLY_MEMBER_FEE",
+                        "years": 1
+                      },
+                      "description": "Product-3 1 year",
+                      "regularPrice": 600,
+                      "fee": 600,
+                      "discounts": [],
+                      "payViaWechat": false,
+                      "enabled": true
+                    }
+                  },
+                  "SINGLE_ENTRY_FEE": {
+                    "value": {
+                      "id": "890",
+                      "productType": "SINGLE_ENTRY_FEE",
+                      "detail": {
+                        "productType": "SINGLE_ENTRY_FEE"
+                      },
+                      "description": "Single entry",
+                      "regularPrice": 200,
+                      "fee": 1,
+                      "discounts": [
+                        {
+                          "discountType": "WEEK_DAY",
+                          "description": "0.01 \"CNY weekday discount\"",
+                          "detail": {
+                            "discountType": "WEEK_DAY",
+                            "salePrice": 1
+                          }
+                        }
+                      ],
+                      "payViaWechat": true,
+                      "enabled": true
+                    }
+                  }
                 }
               }
             }
@@ -207,7 +318,7 @@
           "content": {
             "*/*": {
               "schema": {
-                "$ref": "#/components/schemas/Products"
+                "$ref": "#/components/schemas/WXOrder"
               }
             }
           },
@@ -259,6 +370,40 @@
             }
           }
         }
+      }
+    },
+    "/offlineorder/placeOrder": {
+      "post": {
+        "tags": [
+          "offlineorder"
+        ],
+        "summary": "place offline order",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "Place Offline Order",
+        "requestBody": {
+          "description": "Place order",
+          "content": {
+            "*/*": {
+              "schema": {
+                "$ref": "#/components/schemas/OfflineOrder"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "x-codegen-request-body-name": "body"
       }
     },
     "/checkIn": {
@@ -440,7 +585,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Branch"
+                  "$ref": "#/components/schemas/BranchClientInfo"
                 }
               }
             }
@@ -513,36 +658,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Branch"
+                  "$ref": "#/components/schemas/BranchClientInfo"
                 }
               }
             }
-          },
-          "404": {
-            "description": "Not found"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "branch"
-        ],
-        "summary": "Delete a branch",
-        "operationId": "deleteById",
-        "parameters": [
-          {
-            "name": "branchId",
-            "in": "path",
-            "description": "Branch Id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "deleted"
           },
           "404": {
             "description": "Not found"
@@ -621,9 +740,73 @@
           "id"
         ]
       },
-      "Products": {
+      "ProductDiscount": {
         "type": "object",
         "properties": {
+          "discountType": {
+            "type": "string",
+            "enum": [
+              "WEEK_DAY"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "object"
+          }
+        }
+      },
+      "Produt": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "productType": {
+            "type": "string",
+            "enum": [
+              "MULTI_ENTRIES_FEE",
+              "MONTHLY_MEMBER_FEE",
+              "YEARLY_MEMBER_FEE",
+              "SINGLE_ENTRY_FEE",
+              "EQUIPMENT_RENTAL_FEE"
+            ]
+          },
+          "detail": {
+            "type": "object"
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "discounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDiscount"
+            }
+          }
+        }
+      },
+      "OfflineOrder": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          }
+        }
+      },
+      "WXOrder": {
+        "type": "object",
+        "properties": {
+          "branchId": {
+            "type": "string"
+          },
           "products": {
             "type": "array",
             "items": {
@@ -702,6 +885,39 @@
           "closeTime",
           "description"
         ]
+      },
+      "BranchClientInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "No need for branch creation"
+          },
+          "name": {
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "weekdayOpenHour": {
+            "$ref": "#/components/schemas/OpenHour"
+          },
+          "weekendOpenHour": {
+            "$ref": "#/components/schemas/OpenHour"
+          },
+          "contactNumbers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "isOpen": {
+            "type": "boolean"
+          }
+        }
       },
       "Branch": {
         "type": "object",

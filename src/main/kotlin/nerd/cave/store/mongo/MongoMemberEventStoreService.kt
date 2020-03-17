@@ -1,6 +1,6 @@
 package nerd.cave.store.mongo
 
-import nerd.cave.model.member.MemberEvent
+import nerd.cave.model.api.member.MemberEvent
 import nerd.cave.store.MemberEventStoreService
 
 class MongoMemberEventStoreService(storeService: MongoStoreService): MemberEventStoreService {

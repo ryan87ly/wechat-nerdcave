@@ -7,31 +7,34 @@ import org.litote.kmongo.coroutine.CoroutineCollection
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
+import org.litote.kmongo.util.KMongoConfiguration
 import java.time.Clock
 
 class MongoStoreService(private val config: MongoConfig, private val clock: Clock): StoreService {
     private lateinit var mongoClient: CoroutineClient
     lateinit var db: CoroutineDatabase
-    override val memberStoreService: MemberStoreService by lazy { MongoMemberStoreService(clock, this) }
-    override val memberEventStoreService: MemberEventStoreService by lazy { MongoMemberEventStoreService(this) }
-    override val sessionStoreService: SessionStoreService by lazy { MongoSessionStoreService(clock, this) }
-    override val productStoreService: ProductStoreService by lazy { MongoProductStoreService(clock, this) }
-    override val branchStoreService: BranchStoreService by lazy { MongoBranchStoreService(this) }
-    override val paymentStoreService: PaymentStoreService by lazy { MongoPaymentStoreService(this) }
-    override val ticketStoreService: TicketStoreService by lazy { MongoTicketStoreService(this) }
-    override val tokenStoreService: TokenStoreService by lazy { MongoTokenStoreService(this) }
-    override val wxPaymentCallbackStoreService: WXPaymentCallbackStoreService by lazy { MongoWXPaymentCallbackStoreService(this) }
-    override val disclaimerStoreService: DisclaimerStoreService by lazy { MongoDisclaimerStoreService(this) }
+    override val memberStoreService by lazy { MongoMemberStoreService(clock, this) }
+    override val memberEventStoreService by lazy { MongoMemberEventStoreService(this) }
+    override val sessionStoreService by lazy { MongoSessionStoreService(clock, this) }
+    override val productStoreService by lazy { MongoProductStoreService(clock, this) }
+    override val branchStoreService by lazy { MongoBranchStoreService(this) }
+    override val WXPaymentStoreService by lazy { MongoWXPaymentStoreService(this) }
+    override val ticketStoreService by lazy { MongoTicketStoreService(this) }
+    override val tokenStoreService by lazy { MongoTokenStoreService(this) }
+    override val wxPaymentCallbackStoreService by lazy { MongoWXPaymentCallbackStoreService(this) }
+    override val disclaimerStoreService by lazy { MongoDisclaimerStoreService(this) }
+    override val offlineOrderStoreService by lazy { MongoOfflineOrderStoreService(this) }
+    override val adminAccountStoreService by lazy { MongoAdminAccountStoreService(this) }
+    override val adminSessionStoreService by lazy { MongoAdminSessionStoreService(clock, this) }
+    override val publicHolidayStoreService: PublicHolidayStoreService by lazy { MongoPublicHolidayStoreService(this) }
+    override val branchOpenStatusStoreService: BranchOpenStatusStoreService by lazy { MongoBranchOpenStatusStoreService(clock, this) }
 
     private val storeServices by lazy { listOf(memberStoreService, sessionStoreService, productStoreService) }
 
-    companion object {
-        private val DB_NAME = "nerdcave"
-    }
-
     override suspend fun start() {
+        KMongoConfiguration.bsonMapper.registerModule(NerdCaveModule)
         mongoClient = KMongo.createClient(config.mongoClientSetting).coroutine
-        db = mongoClient.getDatabase(DB_NAME)
+        db = mongoClient.getDatabase(config.dbName)
         db.listCollectionNames()
 
         storeServices.forEach { it.start() }
@@ -48,6 +51,10 @@ class MongoStoreService(private val config: MongoConfig, private val clock: Cloc
 
     inline fun <reified T: Any> getCollection(): CoroutineCollection<T> {
         return db.getCollection(T::class.java.simpleName.toLowerCase())
+    }
+
+    inline fun <reified T: Any> getAdminCollection(): CoroutineCollection<T> {
+        return db.getCollection("a_${T::class.java.simpleName.toLowerCase()}")
     }
 
 }
