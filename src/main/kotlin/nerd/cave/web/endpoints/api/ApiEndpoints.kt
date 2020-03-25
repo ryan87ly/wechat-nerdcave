@@ -32,15 +32,16 @@ class ApiEndpoints (
 ): HttpEndpoint {
 
     override val router: Router = Router.router(vertx).apply {
-        mountSubRouter("/login", LoginEndpoints(vertx, wxWebClient, storeService.sessionStoreService, storeService.memberStoreService, memberService).router)
-        mountSubRouter("/notification", WXNotificationEndpoints(vertx, clock, paymentSecretRetriever, storeService.wxPaymentCallbackStoreService, orderService).router)
+        mountSubRouter("/login", LoginEndpoints(vertx, wxWebClient, storeService, memberService).router)
+        mountSubRouter("/notification", WXNotificationEndpoints(vertx, clock, paymentSecretRetriever, storeService, orderService).router)
         mountSubRouter("/member", MemberEndpoints(vertx, sessionHandler, memberService).router)
         mountSubRouter("/checkIn", CheckInEndpoints(vertx, sessionHandler, storeService, checkInService).router)
         mountSubRouter("/branch", BranchEndpoints(vertx, sessionHandler, branchService).router)
-        mountSubRouter("/product", ProductEndpoints(vertx, sessionHandler, clock, storeService.productStoreService, holidayService).router)
+        mountSubRouter("/product", ProductEndpoints(vertx, sessionHandler, clock, storeService, holidayService).router)
         mountSubRouter("/payment", PaymentEndpoints(vertx, clock, wxPayClient, sessionHandler, paymentSecretRetriever, memberService, orderService, branchService, storeService).router)
         mountSubRouter("/disclaimer", DisclaimerEndpoints(vertx, sessionHandler, storeService).router)
         mountSubRouter("/offlineorder", OfflineOrderEndpoints(vertx, sessionHandler, storeService, orderService).router)
+        mountSubRouter("/notification", NotificationEndpoints(vertx, sessionHandler, storeService).router)
         options().handler { ctx ->
             ctx.response().apply {
                 headers().apply {

@@ -2,12 +2,13 @@ package nerd.cave.service.member
 
 import nerd.cave.model.api.member.*
 import nerd.cave.model.api.product.Product
+import nerd.cave.store.StoreService
 import nerd.cave.store.mongo.MongoStoreService
 import nerd.cave.web.exceptions.BadRequestException
 import java.time.Clock
 import java.time.ZonedDateTime
 
-class MemberServiceImpl(private val clock: Clock, storeService: MongoStoreService): MemberService {
+class MemberServiceImpl(private val clock: Clock, storeService: StoreService): MemberService {
     private val ticketStoreService by lazy { storeService.ticketStoreService }
     private val memberStoreService by lazy { storeService.memberStoreService }
 
@@ -27,6 +28,18 @@ class MemberServiceImpl(private val clock: Clock, storeService: MongoStoreServic
             is SpecialMemberDetail -> if(memberDetail.isExpired(now)) NormalMember(ticketStoreService.countNotUsedTickets(memberId)) else memberDetail
             else -> memberDetail
         }
+    }
+
+    override suspend fun getRawMembersInfo(start: Int, count: Int): List<Member> {
+        return memberStoreService.fetchMembers(start, count)
+    }
+
+    override suspend fun getRawMember(memberId: String): Member? {
+        return memberStoreService.fetchById(memberId)
+    }
+
+    override suspend fun updateMemberInfo(memberId:String, memberContact: MemberContact, memberDetail: MemberDetail): Boolean {
+        return memberStoreService.updateMemberInfo(memberId, memberContact, memberDetail)
     }
 
     override suspend fun spendEntry(member: Member): Boolean {

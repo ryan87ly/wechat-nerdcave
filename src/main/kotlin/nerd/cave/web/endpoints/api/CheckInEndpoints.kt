@@ -18,11 +18,12 @@ import nerd.cave.web.extentions.ok
 import nerd.cave.web.session.NerdCaveSessionHandler
 import nerd.cave.web.session.nerdCaveMember
 import org.slf4j.LoggerFactory
+import java.time.ZonedDateTime
 
 class CheckInEndpoints (
     vertx: Vertx,
     sessionHandler: NerdCaveSessionHandler,
-    private val storeService: StoreService,
+    storeService: StoreService,
     private val checkInService: CheckInService
 ): HttpEndpoint {
     companion object {
@@ -39,6 +40,7 @@ class CheckInEndpoints (
         get("/token/:checkInDate") { checkInToken(it) }
         get("/ranking/:startDate") { checkInRanking(it) }
         get("/ranking/:startDate/:endDate") { checkInRanking(it) }
+        get("/currentnumber/:branchId") { currentBranchPeopleNumber(it) }
     }
 
     private suspend fun checkIn(ctx: RoutingContext) {
@@ -97,6 +99,16 @@ class CheckInEndpoints (
                     "totalMembers" to totalMembers
                 )
             )
+    }
+
+    private suspend fun currentBranchPeopleNumber(ctx: RoutingContext) {
+        val branchId = ctx.request().params().get("branchId")
+        val count = checkInService.fetchRecentCheckIns(branchId)
+        ctx.response().ok(
+            jsonObjectOf(
+                "count" to count
+            )
+        )
     }
 
 }

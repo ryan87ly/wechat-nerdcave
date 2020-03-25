@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 data class Product(
     val id: String,
+    val name: String,
+    val description: String,
     val productType: ProductType,
     val detail: ProductDetail,
-    val shortDescription: String,
-    val description: String,
     val discounts: List<ProductDiscount>,
     val regularPrice: Int, // in 0.01 RMB
     val payViaWechat: Boolean,

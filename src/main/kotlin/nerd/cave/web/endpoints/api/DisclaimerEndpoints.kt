@@ -57,7 +57,7 @@ class DisclaimerEndpoints(
         memberStoreService.updateMemberContact(member.id, MemberContact(legalName, contactNumber, emergentContactNumber))
         ctx.response().ok(
             jsonObjectOf(
-                "ok" to 1
+                "ok" to true
             )
         )
     }

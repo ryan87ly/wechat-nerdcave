@@ -52,7 +52,7 @@ class OrderServiceImpl(private val clock: Clock, storeService: StoreService, hol
             product.id,
             product.productType,
             product.detail,
-            product.shortDescription
+            product.name
         )
         val order = OfflineOrder(
             id,
@@ -67,10 +67,10 @@ class OrderServiceImpl(private val clock: Clock, storeService: StoreService, hol
     }
 
     override suspend fun approveOfflineOrder(orderId: String, approver: Account) {
+        if (!approver.hasRight(Right.APPROVE_OFFLINE_ORDER)) throw ForbiddenException("Account [${approver.nickname}] is not allowed to approve offline order")
         val order = offlineOrderStoreService.fetchOrder(orderId) ?: throw BadRequestException("No offline order found [$orderId]")
         if (order.status == OfflineOrderStatus.APPROVED) throw BadRequestException("Order [$orderId] has already been approved")
         val member = memberStoreService.fetchById(order.memberId) ?: throw BadRequestException("Member [${order.memberId}] not found!")
-        if (!approver.hasRight(Right.APPROVE_OFFLINE_ORDER)) throw ForbiddenException("Account [${approver.nickname}] is not allowed to approve offline order")
         val approvalInfo = ApprovalInfo(approver.id, ZonedDateTime.now(clock))
         if (offlineOrderStoreService.approveOrder(orderId, approvalInfo)) {
             redeemOfflineProduct(member, order.item.detail)
@@ -169,7 +169,7 @@ class OrderServiceImpl(private val clock: Clock, storeService: StoreService, hol
 
     override suspend fun newPayment(memberId: String, openid: String, branchId: String, products: List<Product>): WXPayment {
         val id = idGenerator.nextId()
-        val items = products.map { PaymentItem(it.id, it.productType, it.shortDescription, priceResolver.getPrice(it)) }
+        val items = products.map { PaymentItem(it.id, it.productType, it.name, priceResolver.getPrice(it)) }
         val totalFee = items.map { it.itemFee }
             .sum()
         val now = ZonedDateTime.now(clock)

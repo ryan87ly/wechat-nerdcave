@@ -24,6 +24,11 @@ class MongoProductStoreService(private val clock: Clock, mongoStoreService: Mong
         collection.insertOne(product)
     }
 
+    override suspend fun updateProduct(product: Product): Boolean {
+        val query = "id" eq product.id
+        return collection.updateOne(query, product).succeedUpdateOne()
+    }
+
     override suspend fun deleteById(id: String): Boolean {
         val query = "id" eq id
         return collection.deleteOne(query).deletedCount == 1L

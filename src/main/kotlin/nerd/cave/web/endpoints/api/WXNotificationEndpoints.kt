@@ -9,6 +9,7 @@ import io.vertx.kotlin.coroutines.dispatcher
 import nerd.cave.model.api.order.wechat.WXPaymentCallback
 import nerd.cave.service.order.OrderService
 import nerd.cave.service.order.hasProceeded
+import nerd.cave.store.StoreService
 import nerd.cave.store.WXPaymentCallbackStoreService
 import nerd.cave.web.endpoints.HttpEndpoint
 import nerd.cave.web.extentions.coroutine
@@ -24,12 +25,14 @@ class WXNotificationEndpoints(
     vertx: Vertx,
     private val clock: Clock,
     private val paymentSecretRetriever: PaymentSecretRetriever,
-    private val wxPaymentCallbackStoreService: WXPaymentCallbackStoreService,
+    storeService: StoreService,
     private val orderService: OrderService
 ): HttpEndpoint {
     companion object {
         private val logger = LoggerFactory.getLogger(WXNotificationEndpoints::class.java)
     }
+
+    private val wxPaymentCallbackStoreService: WXPaymentCallbackStoreService by lazy { storeService.wxPaymentCallbackStoreService }
 
     override val router = Router.router(vertx).coroutine(vertx.dispatcher(), logger).apply {
         post("/payment") { paymentCallback(it) }

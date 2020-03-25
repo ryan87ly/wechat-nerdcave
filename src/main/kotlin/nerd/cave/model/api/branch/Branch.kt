@@ -11,7 +11,7 @@ data class Branch(
     val name: String,
     val location: LocationInfo,
     val weekdayOpenHour: OpenHourInfo,
-    val holidayOpenHourInfo: OpenHourInfo,
+    val holidayOpenHour: OpenHourInfo,
     val contactNumbers: List<String>,
     val description: String,
     val active: Boolean
@@ -35,8 +35,13 @@ data class BranchOpenStatus(
     val branchId: String,
     val date: LocalDate,
     val updatedTime: ZonedDateTime,
-    val isOpen: Boolean
+    val status: OpenStatus
 )
+
+enum class OpenStatus{
+    OPEN,
+    CLOSED
+}
 
 fun OpenHourInfo.isOpen(time: LocalTime): Boolean {
     return !time.isBefore(openTime) && time.isBefore(closeTime)

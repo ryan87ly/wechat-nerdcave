@@ -11,9 +11,13 @@ import nerd.cave.model.api.session.SESSION_COOKIE_NAME
 import nerd.cave.service.member.MemberService
 import nerd.cave.store.MemberStoreService
 import nerd.cave.store.SessionStoreService
+import nerd.cave.store.StoreService
 import nerd.cave.web.endpoints.HttpEndpoint
 import nerd.cave.web.exceptions.BadRequestException
-import nerd.cave.web.extentions.*
+import nerd.cave.web.extentions.coroutine
+import nerd.cave.web.extentions.getMandatoryInt
+import nerd.cave.web.extentions.getMandatoryString
+import nerd.cave.web.extentions.ok
 import nerd.cave.web.wx.WXWebClient
 import nerd.cave.web.wx.isSuccess
 import org.slf4j.LoggerFactory
@@ -21,14 +25,16 @@ import org.slf4j.LoggerFactory
 class LoginEndpoints(
     vertx: Vertx,
     private val wxWebClient: WXWebClient,
-    private val sessionStoreService: SessionStoreService,
-    private val memberStoreService: MemberStoreService,
+    storeService: StoreService,
     private val memberService: MemberService
 ): HttpEndpoint {
 
     companion object {
         private val logger = LoggerFactory.getLogger(LoginEndpoints::class.java)
     }
+
+    private val sessionStoreService: SessionStoreService by lazy { storeService.sessionStoreService }
+    private val memberStoreService: MemberStoreService by lazy { storeService.memberStoreService }
 
     override val router = Router.router(vertx).coroutine(vertx.dispatcher(), logger).apply {
         post("/") { userLogin(it) }

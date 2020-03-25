@@ -32,6 +32,13 @@ class CoroutineRouter(private val dispatcher: CoroutineDispatcher, private val l
         return route(HttpMethod.DELETE, path, handler)
     }
 
+    fun put(
+        path: String,
+        handler: suspend (RoutingContext) -> Unit
+    ): Route {
+        return route(HttpMethod.PUT, path, handler)
+    }
+
     fun post(
         path: String,
         handler: suspend (RoutingContext) -> Unit

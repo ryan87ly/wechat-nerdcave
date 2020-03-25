@@ -17,6 +17,12 @@ class MongoPublicHolidayStoreService(storeService: MongoStoreService): PublicHol
         return collection.countDocuments("date" eq date.toFormattedString()) > 0L
     }
 
+    override suspend fun getHolidays(year: Int): List<PublicHoliday> {
+        val pattern = "^$year\\d+"
+        val query = "date" regex pattern
+        return collection.find(query).toList()
+    }
+
     override suspend fun addHoliday(date: LocalDate) {
         collection.insertOne(PublicHoliday(date))
     }

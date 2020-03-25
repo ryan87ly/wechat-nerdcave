@@ -6,6 +6,7 @@ import nerd.cave.util.toFormattedString
 import org.bson.codecs.pojo.annotations.BsonId
 import org.litote.kmongo.*
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 class MongoTokenStoreService(storeService: MongoStoreService): TokenStoreService {
     private val collection by lazy { storeService.getCollection<Token>() }
@@ -35,6 +36,12 @@ class MongoTokenStoreService(storeService: MongoStoreService): TokenStoreService
             .sorted()
     }
 
+    override suspend fun histories(startDateInclusive: LocalDate, endDateExclusive: LocalDate?): List<Token> {
+        val baseQuery = "checkInDate" gte startDateInclusive.toFormattedString()
+        val query = if (endDateExclusive == null) baseQuery else and(baseQuery, "checkInDate" lt endDateExclusive.toFormattedString())
+        return collection.find(query).toList()
+    }
+
     data class RankingResult(
         @BsonId
         val memberId: String,
@@ -60,6 +67,13 @@ class MongoTokenStoreService(storeService: MongoStoreService): TokenStoreService
         ).toList().map { it.memberId to it.count }
     }
 
+    override suspend fun countByBranch(branchId: String, startTimeInclusive: ZonedDateTime): Long {
+        val query = and(
+            Token::branchId eq branchId,
+            Token::checkInTime gte startTimeInclusive
+        )
+        return collection.countDocuments(query)
+    }
 
 
 }

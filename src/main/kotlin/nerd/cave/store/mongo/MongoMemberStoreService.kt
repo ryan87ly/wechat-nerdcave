@@ -8,10 +8,7 @@ import nerd.cave.model.api.member.WechatMember
 import nerd.cave.model.api.member.*
 import nerd.cave.store.MemberStoreService
 import nerd.cave.util.MongoIdGenerator
-import org.litote.kmongo.and
-import org.litote.kmongo.eq
-import org.litote.kmongo.setValue
-import org.litote.kmongo.where
+import org.litote.kmongo.*
 import java.time.Clock
 import java.time.ZonedDateTime
 
@@ -22,6 +19,7 @@ class MongoMemberStoreService(private val clock: Clock, mongoStoreService: Mongo
     override suspend fun start() {
         collection.ensureIndex("id" eq 1, IndexOptions().unique(true))
         collection.ensureIndex("memberSource.openid" eq 1, IndexOptions().unique(true))
+        collection.ensureIndex("registerTime" eq -1)
     }
 
     override suspend fun getOrCreateWechatMember(openid: String, nickName: String, gender: Int): Member {
@@ -48,9 +46,17 @@ class MongoMemberStoreService(private val clock: Clock, mongoStoreService: Mongo
         return collection.findOne(Member::id eq id)
     }
 
-    override suspend fun spendMemberEntry(memberId: String): Boolean {
+    override suspend fun fetchMembers(start: Int, count: Int): List<Member> {
+        return collection.find()
+            .sort("registerTime" eq  -1)
+            .skip(start)
+            .limit(count)
+            .toList()
+    }
+
+    override suspend fun spendMemberEntry(id: String): Boolean {
         val query = and(
-            "id" eq memberId,
+            "id" eq id,
             "memberDetail.memberType" eq MemberType.MULTI_ENTRIES.name,
             where("this.memberDetail.usedEntries < this.memberDetail.totalEntries" )
         )
@@ -58,18 +64,27 @@ class MongoMemberStoreService(private val clock: Clock, mongoStoreService: Mongo
         return collection.updateOne(query, update).succeedUpdateOne()
     }
 
-    override suspend fun updateMemberDetail(memberId: String, memberDetail: MemberDetail) {
-        val query = "id" eq memberId
+    override suspend fun updateMemberDetail(id: String, memberDetail: MemberDetail) {
+        val query = "id" eq id
         val update = setValue(Member::memberDetail, memberDetail)
         collection.updateOne(query, update)
+    }
+
+    override suspend fun updateMemberInfo(id: String, memberContact: MemberContact, memberDetail: MemberDetail): Boolean {
+        val query = "id" eq id
+        val update = combine(
+            setValue(Member::memberContact, memberContact),
+            setValue(Member::memberDetail, memberDetail)
+        )
+        return collection.updateOne(query, update).succeedUpdateOne()
     }
 
     override suspend fun totalMembers(): Long {
         return collection.countDocuments()
     }
 
-    override suspend fun updateMemberContact(memberId: String, memberContact: MemberContact) {
-        val query = "id" eq memberId
+    override suspend fun updateMemberContact(id: String, memberContact: MemberContact) {
+        val query = "id" eq id
         val update = setValue(Member::memberContact, memberContact)
         collection.updateOne(query, update)
     }

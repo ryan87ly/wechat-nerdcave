@@ -8,6 +8,7 @@ interface BranchStoreService: LifeCycle {
     suspend fun fetchActiveBranches(): List<Branch>
     suspend fun fetchById(id: String): Branch?
     suspend fun createBranch(branch: Branch)
+    suspend fun updateBranch(branch: Branch): Boolean
     suspend fun deleteById(id: String): Boolean
     suspend fun deactivate(id: String): Boolean
 }

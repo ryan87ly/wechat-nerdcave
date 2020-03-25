@@ -15,12 +15,16 @@ fun String.toLocalDateTime(): LocalDateTime {
     return LocalDateTime.parse(this, LOCALDATETIME_FORMMATER)
 }
 
-fun LocalDateTime.toFormattedString():String {
+fun LocalDateTime.toFormattedString(): String {
     return this.format(LOCALDATETIME_FORMMATER)
 }
 
-fun LocalDate.toFormattedString():String {
+fun LocalDate.toFormattedString(): String {
     return this.format(LOCALDATE_FORMMATER)
+}
+
+fun ZonedDateTime.toFormattedString(): String {
+    return this.withZoneSameInstant(TIME_ZONE).format(LOCALDATETIME_FORMMATER)
 }
 
 fun String.toLocalDate(): LocalDate {

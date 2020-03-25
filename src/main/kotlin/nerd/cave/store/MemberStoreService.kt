@@ -8,8 +8,10 @@ import nerd.cave.model.api.member.MemberDetail
 interface MemberStoreService: LifeCycle {
     suspend fun getOrCreateWechatMember(openid: String, nickName:String, gender: Int): Member
     suspend fun fetchById(id: String): Member?
-    suspend fun spendMemberEntry(memberId: String): Boolean
-    suspend fun updateMemberDetail(memberId: String, memberDetail: MemberDetail)
+    suspend fun fetchMembers(start: Int, count: Int): List<Member>
+    suspend fun spendMemberEntry(id: String): Boolean
+    suspend fun updateMemberDetail(id: String, memberDetail: MemberDetail)
+    suspend fun updateMemberInfo(id: String, memberContact: MemberContact, memberDetail: MemberDetail): Boolean
     suspend fun totalMembers(): Long
-    suspend fun updateMemberContact(memberId: String, memberContact: MemberContact)
+    suspend fun updateMemberContact(id: String, memberContact: MemberContact)
 }

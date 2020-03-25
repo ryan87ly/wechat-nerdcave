@@ -18,4 +18,5 @@ interface StoreService: LifeCycle {
     val adminSessionStoreService: AdminSessionStoreService
     val publicHolidayStoreService: PublicHolidayStoreService
     val branchOpenStatusStoreService: BranchOpenStatusStoreService
+    val notificationStoreService: NotificationStoreService
 }

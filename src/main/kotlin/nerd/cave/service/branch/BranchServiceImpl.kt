@@ -1,11 +1,11 @@
 package nerd.cave.service.branch
 
-import nerd.cave.model.api.branch.Branch
-import nerd.cave.model.api.branch.BranchClientInfo
-import nerd.cave.model.api.branch.isOpen
+import nerd.cave.model.api.branch.*
 import nerd.cave.service.holiday.HolidayService
 import nerd.cave.store.StoreService
+import nerd.cave.web.exceptions.BadRequestException
 import java.time.Clock
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 class BranchServiceImpl(private val clock:Clock, storeService: StoreService, private val holidayService: HolidayService): BranchService {
@@ -26,6 +26,16 @@ class BranchServiceImpl(private val clock:Clock, storeService: StoreService, pri
         return branch.isOpen(time)
     }
 
+    override suspend fun fetchBranchOpenStatus(branchId: String, date: LocalDate): BranchOpenStatus? {
+        if (branchStoreService.fetchById(branchId) == null) throw BadRequestException("Branch not found by id [$branchId]")
+        return branchOpenStatusStoreService.fetchBranchOpenStatus(branchId, date)
+    }
+
+    override suspend fun updateBranchOpenStatus(branchId: String, date: LocalDate, status: OpenStatus): Boolean {
+        if (branchStoreService.fetchById(branchId) == null) throw BadRequestException("Branch not found by id [$branchId]")
+        return branchOpenStatusStoreService.upsertBranchOpenStatus(branchId, date, status)
+    }
+
     private suspend fun Branch.toBranchClientInfo(now: LocalDateTime): BranchClientInfo {
         val isOpen = isOpen(now)
         return BranchClientInfo(
@@ -33,7 +43,7 @@ class BranchServiceImpl(private val clock:Clock, storeService: StoreService, pri
             name,
             location,
             weekdayOpenHour,
-            holidayOpenHourInfo,
+            holidayOpenHour,
             contactNumbers,
             description,
             isOpen
@@ -43,20 +53,13 @@ class BranchServiceImpl(private val clock:Clock, storeService: StoreService, pri
     private suspend fun Branch.isOpen(now: LocalDateTime): Boolean {
         val currentDate = now.toLocalDate()
         val isHoliday = holidayService.isHoliday(currentDate)
-        val presetOpenHourInfo = if (isHoliday) holidayOpenHourInfo else weekdayOpenHour
+        val presetOpenHourInfo = if (isHoliday) holidayOpenHour else weekdayOpenHour
         val localTime = now.toLocalTime()
         val branchOpenStatus = branchOpenStatusStoreService.fetchBranchOpenStatus(id, currentDate)
         return if (branchOpenStatus == null) {
             presetOpenHourInfo.isOpen(localTime)
         } else {
-            val updatedLocalTime = branchOpenStatus.updatedTime.withZoneSameInstant(clock.zone).toLocalTime()
-            if (presetOpenHourInfo.isOpen(localTime)) {
-                if(presetOpenHourInfo.isOpen(updatedLocalTime)) branchOpenStatus.isOpen else true
-            } else if (localTime.isBefore(presetOpenHourInfo.openTime)) {
-                if(updatedLocalTime.isBefore(presetOpenHourInfo.openTime)) branchOpenStatus.isOpen else false
-            } else {
-                if(!updatedLocalTime.isBefore(presetOpenHourInfo.closeTime)) branchOpenStatus.isOpen else false
-            }
+            return branchOpenStatus.status == OpenStatus.OPEN
         }
     }
 

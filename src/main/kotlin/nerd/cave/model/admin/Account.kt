@@ -8,7 +8,7 @@ data class Account(
     val password: String,
     val nickname: String,
     val role: Role,
-    val active: Boolean,
+    val status: AccountStatus,
     val creationTime: ZonedDateTime
 )
 
@@ -25,8 +25,14 @@ enum class Role (private vararg val rights: Right) {
     }
 }
 
+enum class AccountStatus {
+    ACTIVE,
+    DISABLED
+}
+
 enum class Right{
-    CREATE_ACCOUNT,
+    EDIT_ADMIN_ACCOUNT,
+    UPDATE_MEMBER_INFO,
     APPROVE_OFFLINE_ORDER
 }
 

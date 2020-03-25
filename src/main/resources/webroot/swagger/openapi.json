@@ -19,12 +19,36 @@
   ],
   "tags": [
     {
-      "name": "admin_login",
-      "description": "Admin Login"
+      "name": "admin_account",
+      "description": "Admin - Account operations"
+    },
+    {
+      "name": "admin_member",
+      "description": "Admin - Member operations"
     },
     {
       "name": "admin_order",
-      "description": "Admin order operations"
+      "description": "Admin - Order operations"
+    },
+    {
+      "name": "admin_product",
+      "description": "Admin - Product operations"
+    },
+    {
+      "name": "admin_branch",
+      "description": "Admin - Branch operations"
+    },
+    {
+      "name": "admin_holiday",
+      "description": "Admin - Holiday operations"
+    },
+    {
+      "name": "admin_notification",
+      "description": "Admin - Notification operations"
+    },
+    {
+      "name": "admin_checkIn",
+      "description": "Admin - CheckIn operations"
     },
     {
       "name": "login",
@@ -57,13 +81,17 @@
     {
       "name": "disclaimer",
       "description": "memeber disclaimer"
+    },
+    {
+      "name": "notification",
+      "description": "通知"
     }
   ],
   "paths": {
     "/admin/login": {
       "post": {
         "tags": [
-          "admin_login"
+          "admin_account"
         ],
         "summary": "Admin Login with username password",
         "operationId": "admin login",
@@ -91,6 +119,420 @@
           },
           "401": {
             "description": "login failed"
+          }
+        }
+      }
+    },
+    "/admin/accounts": {
+      "get": {
+        "tags": [
+          "admin_account"
+        ],
+        "summary": "Get all admin accounts - can only be called by SUPER_USER",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "5e6cea82e357225ab0ddbaab",
+                    "username": "admin",
+                    "nickname": "RY",
+                    "role": "SUPER_USER",
+                    "status": "ACTIVE",
+                    "creationTime": "20200314223026"
+                  },
+                  {
+                    "id": "5e6cea82e357225ab0ddbaa2",
+                    "username": "admin",
+                    "nickname": "LI",
+                    "role": "BRANCH_MAINTAINER",
+                    "status": "ACTIVE",
+                    "creationTime": "20200313223026"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/account": {
+      "post": {
+        "tags": [
+          "admin_account"
+        ],
+        "summary": "Create new admin account - can only be called by SUPER_USER",
+        "requestBody": {
+          "description": "Admin account detail",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "username": "ry_account",
+                "password": "1234",
+                "nickName": "RY",
+                "role": "SUPER_USER"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/account/updatepassword": {
+      "post": {
+        "tags": [
+          "admin_account"
+        ],
+        "summary": "Update admin account password",
+        "description": "SUPER_USER can update all accounts. BRANCH_MAINTAINER can only update their own password.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "UpdateOwn": {
+                  "summary": "Update own password",
+                  "value": {
+                    "newPassword": "123"
+                  }
+                },
+                "UpdateOther": {
+                  "summary": "SUPER_USER updates other's password",
+                  "value": {
+                    "id": "456",
+                    "newPassword": "123"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/account/updaterole": {
+      "post": {
+        "tags": [
+          "admin_account"
+        ],
+        "summary": "Update admin account role",
+        "description": "only SUPER_USER can update admin account role",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "SUPER_USER": {
+                  "value": {
+                    "id": "234",
+                    "role": "SUPER_USER"
+                  }
+                },
+                "BRANCH_MAINTAINER": {
+                  "value": {
+                    "id": "234",
+                    "role": "BRANCH_MAINTAINER"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/account/updatestatus": {
+      "post": {
+        "tags": [
+          "admin_account"
+        ],
+        "summary": "Update admin account status",
+        "description": "only SUPER_USER can update admin account status",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "ACTIVE": {
+                  "value": {
+                    "id": "234",
+                    "status": "ACTIVE"
+                  }
+                },
+                "DISABLED": {
+                  "value": {
+                    "id": "234",
+                    "status": "DISABLED"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/members": {
+      "get": {
+        "tags": [
+          "admin_member"
+        ],
+        "summary": "Admin - Fetch members",
+        "operationId": "admin fetch member",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "description": "Start index (sorted by registration time)",
+            "required": true,
+            "example": 0,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "Number of members to fetch (sorted by registration time)",
+            "required": true,
+            "example": 5,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "examples": {
+                  "YearlyMember": {
+                    "value": {
+                      "id": "5e67a04ab593d05c529a03f9",
+                      "wechatNickName": "Elon Musk",
+                      "legalName": null,
+                      "contactNumber": null,
+                      "emergentContactNumber": null,
+                      "memberDetail": {
+                        "validFrom": "20200317",
+                        "validUntil": "20210316",
+                        "memberType": "YEARLY"
+                      }
+                    }
+                  },
+                  "MonthlyMember": {
+                    "value": {
+                      "id": "5e67a04ab593d05c529a03f9",
+                      "wechatNickName": "Elon Musk",
+                      "legalName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "emergentContactNumber": "1361234568",
+                      "memberDetail": {
+                        "validFrom": "20200317",
+                        "validUntil": "20210316",
+                        "memberType": "MONTHLY"
+                      }
+                    }
+                  },
+                  "NormalMember": {
+                    "value": {
+                      "id": "5e67a04ab593d05c529a03f9",
+                      "wechatNickName": "Elon Musk",
+                      "legalName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "emergentContactNumber": "1361234568",
+                      "memberDetail": {
+                        "memberType": "NORMAL"
+                      }
+                    }
+                  },
+                  "MultiEntriesMember": {
+                    "value": {
+                      "id": "5e67a04ab593d05c529a03f9",
+                      "wechatNickName": "Elon Musk",
+                      "legalName": "Paul Smith",
+                      "contactNumber": "1361234567",
+                      "emergentContactNumber": "1361234568",
+                      "memberDetail": {
+                        "validFrom": "20200317",
+                        "validUntil": "20210316",
+                        "usedEntries": 5,
+                        "totalEntries": 10,
+                        "memberType": "MULTI_ENTRIES"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/member/{memberId}": {
+      "put": {
+        "tags": [
+          "admin_member"
+        ],
+        "summary": "Admin - Update member",
+        "operationId": "admin update member",
+        "description": "only SUPER_USER role can make this request",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "description": "member Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "update member request body",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "YearlyMember": {
+                  "value": {
+                    "legalName": "Paul Smith",
+                    "contactNumber": "1361234567",
+                    "emergentContactNumber": "1361234568",
+                    "memberDetail": {
+                      "validFrom": "20200317",
+                      "validUntil": "20210316",
+                      "memberType": "YEARLY"
+                    }
+                  }
+                },
+                "MonthlyMember": {
+                  "value": {
+                    "legalName": "Paul Smith",
+                    "contactNumber": "1361234567",
+                    "emergentContactNumber": "1361234568",
+                    "memberDetail": {
+                      "validFrom": "20200317",
+                      "validUntil": "20210316",
+                      "memberType": "MONTHLY"
+                    }
+                  }
+                },
+                "NormalMember": {
+                  "value": {
+                    "legalName": "Paul Smith",
+                    "contactNumber": "1361234567",
+                    "emergentContactNumber": "1361234568",
+                    "memberDetail": {
+                      "memberType": "NORMAL"
+                    }
+                  }
+                },
+                "MultiEntriesMember": {
+                  "value": {
+                    "legalName": "Paul Smith",
+                    "contactNumber": "1361234567",
+                    "emergentContactNumber": "1361234568",
+                    "memberDetail": {
+                      "validFrom": "20200317",
+                      "validUntil": "20210316",
+                      "usedEntries": 5,
+                      "totalEntries": 10,
+                      "memberType": "MULTI_ENTRIES"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "forbidden"
           }
         }
       }
@@ -411,6 +853,828 @@
           },
           "401": {
             "description": "unauthorized"
+          }
+        }
+      }
+    },
+    "/admin/products/": {
+      "get": {
+        "tags": [
+          "admin_product"
+        ],
+        "summary": "Admin - Get all products",
+        "operationId": "Admin get products",
+        "responses": {
+          "200": {
+            "description": "succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/product/": {
+      "post": {
+        "tags": [
+          "admin_product"
+        ],
+        "summary": "Admin - Create product",
+        "operationId": "Admin creates product",
+        "requestBody": {
+          "description": "Product info",
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/MultiEntriesProduct"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MonthlyMemberProduct"
+                  },
+                  {
+                    "$ref": "#/components/schemas/YearlyMemberProduct"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EquipmentRentalProduct"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SingleEntryProduct"
+                  }
+                ]
+              },
+              "examples": {
+                "MultiEntriesProduct": {
+                  "value": {
+                    "name": "10次票",
+                    "description": "Product-1 10 entries",
+                    "productType": "MULTI_ENTRIES_FEE",
+                    "detail": {
+                      "productType": "MULTI_ENTRIES_FEE",
+                      "entries": 10,
+                      "validMonths": 3
+                    },
+                    "discounts": [],
+                    "regularPrice": 200,
+                    "payViaWechat": false,
+                    "enabled": true
+                  }
+                },
+                "MonthlyMemberProduct": {
+                  "value": {
+                    "name": "月卡",
+                    "description": "Product-2 1 month",
+                    "productType": "MONTHLY_MEMBER_FEE",
+                    "detail": {
+                      "productType": "MONTHLY_MEMBER_FEE",
+                      "months": 1
+                    },
+                    "discounts": [],
+                    "regularPrice": 400,
+                    "payViaWechat": false,
+                    "enabled": true
+                  }
+                },
+                "YearlyMmeberProduct": {
+                  "value": {
+                    "name": "年卡",
+                    "description": "Product-3 1 year",
+                    "productType": "YEARLY_MEMBER_FEE",
+                    "detail": {
+                      "productType": "YEARLY_MEMBER_FEE",
+                      "years": 1
+                    },
+                    "discounts": [],
+                    "regularPrice": 600,
+                    "payViaWechat": false,
+                    "enabled": true
+                  }
+                },
+                "SingleEntryProduct": {
+                  "value": {
+                    "name": "单次票",
+                    "description": "Single entry",
+                    "productType": "SINGLE_ENTRY_FEE",
+                    "detail": {
+                      "productType": "SINGLE_ENTRY_FEE"
+                    },
+                    "discounts": [
+                      {
+                        "discountType": "WEEK_DAY",
+                        "description": "0.01 CNY weekday discount",
+                        "detail": {
+                          "discountType": "WEEK_DAY",
+                          "salePrice": 1
+                        }
+                      }
+                    ],
+                    "regularPrice": 200,
+                    "payViaWechat": true,
+                    "enabled": true
+                  }
+                },
+                "EquipmentRentalProduct": {
+                  "value": {
+                    "name": "租鞋子",
+                    "description": "Boot rentail",
+                    "productType": "EQUIPMENT_RENTAL_FEE",
+                    "detail": {
+                      "productType": "EQUIPMENT_RENTAL_FEE"
+                    },
+                    "discounts": [],
+                    "regularPrice": 1,
+                    "payViaWechat": true,
+                    "enabled": true
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/product/{productId}": {
+      "put": {
+        "tags": [
+          "admin_product"
+        ],
+        "summary": "Admin - Update product",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "product Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/MultiEntriesProduct"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MonthlyMemberProduct"
+                  },
+                  {
+                    "$ref": "#/components/schemas/YearlyMemberProduct"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EquipmentRentalProduct"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SingleEntryProduct"
+                  }
+                ]
+              },
+              "examples": {
+                "MultiEntriesProduct": {
+                  "value": {
+                    "name": "10次票",
+                    "description": "Product-1 10 entries",
+                    "productType": "MULTI_ENTRIES_FEE",
+                    "detail": {
+                      "productType": "MULTI_ENTRIES_FEE",
+                      "entries": 10,
+                      "validMonths": 3
+                    },
+                    "discounts": [],
+                    "regularPrice": 200,
+                    "payViaWechat": false,
+                    "enabled": true
+                  }
+                },
+                "MonthlyMemberProduct": {
+                  "value": {
+                    "id": "cd758880-a397-4140-91f0-84af74402c5d",
+                    "name": "月卡",
+                    "description": "Product-2 1 month",
+                    "productType": "MONTHLY_MEMBER_FEE",
+                    "detail": {
+                      "productType": "MONTHLY_MEMBER_FEE",
+                      "months": 1
+                    },
+                    "discounts": [],
+                    "regularPrice": 400,
+                    "payViaWechat": false,
+                    "enabled": true
+                  }
+                },
+                "YearlyMmeberProduct": {
+                  "value": {
+                    "id": "23a5d6f6-9bf9-4318-9d39-4e5862dde29b",
+                    "name": "年卡",
+                    "description": "Product-3 1 year",
+                    "productType": "YEARLY_MEMBER_FEE",
+                    "detail": {
+                      "productType": "YEARLY_MEMBER_FEE",
+                      "years": 1
+                    },
+                    "discounts": [],
+                    "regularPrice": 600,
+                    "payViaWechat": false,
+                    "enabled": true
+                  }
+                },
+                "SingleEntryProduct": {
+                  "value": {
+                    "id": "5e636b68fbc51c3035c20f6d",
+                    "name": "单次票",
+                    "description": "Single entry",
+                    "productType": "SINGLE_ENTRY_FEE",
+                    "detail": {
+                      "productType": "SINGLE_ENTRY_FEE"
+                    },
+                    "discounts": [
+                      {
+                        "discountType": "WEEK_DAY",
+                        "description": "0.01 CNY weekday discount",
+                        "detail": {
+                          "discountType": "WEEK_DAY",
+                          "salePrice": 1
+                        }
+                      }
+                    ],
+                    "regularPrice": 200,
+                    "payViaWechat": true,
+                    "enabled": true
+                  }
+                },
+                "EquipmentRentalProduct": {
+                  "value": {
+                    "id": "9b38442f-efd0-43c1-97cb-f43f7d9e3ec4",
+                    "name": "租鞋子",
+                    "description": "Boot rentail",
+                    "productType": "EQUIPMENT_RENTAL_FEE",
+                    "detail": {
+                      "productType": "EQUIPMENT_RENTAL_FEE"
+                    },
+                    "discounts": [],
+                    "regularPrice": 1,
+                    "payViaWechat": true,
+                    "enabled": true
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/branches/": {
+      "get": {
+        "tags": [
+          "admin_branch"
+        ],
+        "summary": "Admin - Get all branches",
+        "operationId": "Admin get branches",
+        "responses": {
+          "200": {
+            "description": "succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/branch/": {
+      "post": {
+        "tags": [
+          "admin_branch"
+        ],
+        "summary": "Admin - Create branch",
+        "operationId": "Admin creates branch",
+        "requestBody": {
+          "description": "Branch info",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "NC 1",
+                "location": {
+                  "longitude": 100,
+                  "latitude": 100,
+                  "description": "Wingwah building"
+                },
+                "weekdayOpenHour": {
+                  "openTime": "090000",
+                  "closeTime": "210000",
+                  "description": "朝九晚九"
+                },
+                "holidayOpenHour": {
+                  "openTime": "090000",
+                  "closeTime": "230000",
+                  "description": "朝九晚十"
+                },
+                "contactNumbers": [
+                  "53406506"
+                ],
+                "description": "branch 1",
+                "active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/branch/{branchId}": {
+      "put": {
+        "tags": [
+          "admin_branch"
+        ],
+        "summary": "Admin - Update branch",
+        "parameters": [
+          {
+            "name": "branchId",
+            "in": "path",
+            "description": "branchId Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "name": "NC 1",
+                "location": {
+                  "longitude": 100,
+                  "latitude": 100,
+                  "description": "Wingwah building"
+                },
+                "weekdayOpenHour": {
+                  "openTime": "090000",
+                  "closeTime": "210000",
+                  "description": "朝九晚九"
+                },
+                "holidayOpenHour": {
+                  "openTime": "090000",
+                  "closeTime": "230000",
+                  "description": "朝九晚十"
+                },
+                "contactNumbers": [
+                  "53406506"
+                ],
+                "description": "branch 1",
+                "active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/branch/manualstatus/{branchId}/{date}": {
+      "get": {
+        "tags": [
+          "admin_branch"
+        ],
+        "parameters": [
+          {
+            "name": "branchId",
+            "in": "path",
+            "description": "Branch Id",
+            "required": true,
+            "example": 123,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "path",
+            "description": "Date",
+            "example": 20200315,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "summary": "Admin - Get manually set status",
+        "operationId": "Admin Get manually set status",
+        "responses": {
+          "200": {
+            "description": "succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "examples": {
+                  "Open": {
+                    "value": {
+                      "branchId": "5e6e38305653854644c1fa72",
+                      "date": "20200321",
+                      "status": "OPEN"
+                    }
+                  },
+                  "Closed": {
+                    "value": {
+                      "branchId": "5e6e38305653854644c1fa72",
+                      "date": "20200321",
+                      "status": "Closed"
+                    }
+                  },
+                  "Unset": {
+                    "value": {
+                      "branchId": "5e6e38305653854644c1fa72",
+                      "date": "20200322",
+                      "status": "UNSET"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin_branch"
+        ],
+        "parameters": [
+          {
+            "name": "branchId",
+            "in": "path",
+            "description": "Branch Id",
+            "required": true,
+            "example": 123,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "in": "path",
+            "description": "Date",
+            "example": 20200315,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Manual set status",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "examples": {
+                "Open": {
+                  "value": {
+                    "status": "Open"
+                  }
+                },
+                "Closed": {
+                  "value": {
+                    "status": "Closed"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "succeeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/holiday": {
+      "get": {
+        "tags": [
+          "admin_holiday"
+        ],
+        "summary": "Admin - Get holidays",
+        "operationId": "Admin get holidays",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "description": "year",
+            "required": true,
+            "example": 2020,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "value": [
+                    "20200101",
+                    "20200501",
+                    "20201001"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin_holiday"
+        ],
+        "summary": "Admin - Add holiday",
+        "operationId": "Admin add holiday",
+        "requestBody": {
+          "description": "Add holiday request boday",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "value": {
+                  "date": 20200315
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/holiday/{date}": {
+      "delete": {
+        "tags": [
+          "admin_holiday"
+        ],
+        "summary": "Admin - Delete holiday",
+        "operationId": "Admin delete holiday",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "description": "date",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": 20200315
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/checkIn/histories/{startDate}": {
+      "get": {
+        "tags": [
+          "admin_checkIn"
+        ],
+        "summary": "All members' Check in history from startDate(inclusive) to latest",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "path",
+            "description": "start date inclusive",
+            "required": true,
+            "example": "20200220",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": [
+                  {
+                    "branchId": "5e4024b000653065cc851f8f",
+                    "branchName": "NC 2",
+                    "memberId": "123",
+                    "memberName": "Noone",
+                    "memberType": "NORMAL",
+                    "checkInTime": "20200225230516",
+                    "checkInDate": "20200225"
+                  },
+                  {
+                    "branchId": "5e6e38305653854644c1fa72",
+                    "branchName": "NC 1",
+                    "memberId": "234",
+                    "memberName": "Paul Smith",
+                    "memberType": "NORMAL",
+                    "checkInTime": "20200322210216",
+                    "checkInDate": "20200322"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/checkIn/histories/{startDate}/{endDate}": {
+      "get": {
+        "tags": [
+          "admin_checkIn"
+        ],
+        "summary": "All members' Check in history from startDate(inclusive) to endDate(exclusive)",
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "path",
+            "description": "start date inclusive",
+            "required": true,
+            "example": "20200220",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "path",
+            "description": "start date exclusive",
+            "required": true,
+            "example": "20200301",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": [
+                  {
+                    "branchId": "5e4024b000653065cc851f8f",
+                    "branchName": "NC 2",
+                    "memberId": "123",
+                    "memberName": "Noone",
+                    "memberType": "NORMAL",
+                    "checkInTime": "20200225230516",
+                    "checkInDate": "20200225"
+                  },
+                  {
+                    "branchId": "5e6e38305653854644c1fa72",
+                    "branchName": "NC 1",
+                    "memberId": "234",
+                    "memberName": "Paul Smith",
+                    "memberType": "NORMAL",
+                    "checkInTime": "20200322210216",
+                    "checkInDate": "20200322"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/notification/": {
+      "post": {
+        "tags": [
+          "admin_notification"
+        ],
+        "summary": "Admin - Add notification",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              },
+              "example": {
+                "title": "11 / 15 闭馆通知 （11.17 – 11.19",
+                "detail": "由于更换线路需要，nc1.0将在11.17 – 11.19闭馆维护"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       }
@@ -1021,6 +2285,41 @@
         }
       }
     },
+    "/api/checkIn/currentnumber/{branchId}": {
+      "get": {
+        "tags": [
+          "checkIn"
+        ],
+        "summary": "当年门店人数",
+        "parameters": [
+          {
+            "name": "branchId",
+            "in": "path",
+            "description": "门店ID",
+            "required": true,
+            "example": "123",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "count": 100
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/branch/all": {
       "get": {
         "tags": [
@@ -1035,47 +2334,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BranchClientInfo"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/branch": {
-      "post": {
-        "tags": [
-          "branch"
-        ],
-        "summary": "Create nerdcave branch",
-        "operationId": "createBranch",
-        "requestBody": {
-          "description": "branch information",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Branch"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Id"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -1167,7 +2425,32 @@
                   "$ref": "#/components/schemas/Ok"
                 },
                 "example": {
-                  "ok": 1
+                  "ok": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notification/latest": {
+      "get": {
+        "tags": [
+          "notification"
+        ],
+        "description": "latest notification",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                },
+                "example": {
+                  "title": "11 / 15 闭馆通知 （11.17 – 11.19",
+                  "detail": "由于更换线路需要，nc1.0将在11.17 – 11.19闭馆维护",
+                  "time": "20200322125136"
                 }
               }
             }
@@ -1211,6 +2494,150 @@
             "type": "string"
           }
         }
+      },
+      "ProductRequestBase": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "productType": {
+            "type": "string",
+            "enum": [
+              "MULTI_ENTRIES_FEE",
+              "MONTHLY_MEMBER_FEE",
+              "YEARLY_MEMBER_FEE",
+              "EQUIPMENT_RENTAL_FEE",
+              "SINGLE_ENTRY_FEE"
+            ]
+          },
+          "regularPrice": {
+            "type": "integer"
+          },
+          "payViaWechat": {
+            "type": "boolean"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "discounts": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "MultiEntriesProductDetail": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "integer"
+          },
+          "validMonths": {
+            "type": "integer"
+          }
+        }
+      },
+      "MultiEntriesProduct": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProductRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "$ref": "#/components/schemas/MultiEntriesProductDetail"
+              }
+            }
+          }
+        ]
+      },
+      "MonthlyMemberProductDetail": {
+        "type": "object",
+        "properties": {
+          "months": {
+            "type": "integer"
+          }
+        }
+      },
+      "MonthlyMemberProduct": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProductRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "$ref": "#/components/schemas/MonthlyMemberProductDetail"
+              }
+            }
+          }
+        ]
+      },
+      "YearlyMemberProductDetail": {
+        "type": "object",
+        "properties": {
+          "years": {
+            "type": "integer"
+          }
+        }
+      },
+      "YearlyMemberProduct": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProductRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "$ref": "#/components/schemas/YearlyMemberProductDetail"
+              }
+            }
+          }
+        ]
+      },
+      "EquipmentRentalProductDetail": {
+        "type": "object"
+      },
+      "EquipmentRentalProduct": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProductRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "$ref": "#/components/schemas/EquipmentRentalProductDetail"
+              }
+            }
+          }
+        ]
+      },
+      "SingleEntryProductDetail": {
+        "type": "object"
+      },
+      "SingleEntryProduct": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProductRequestBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "detail": {
+                "$ref": "#/components/schemas/SingleEntryProductDetail"
+              }
+            }
+          }
+        ]
       },
       "Id": {
         "type": "object",
@@ -1308,7 +2735,7 @@
             "type": "string"
           },
           "gender": {
-            "type": "string"
+            "type": "integer"
           }
         }
       },
@@ -1469,7 +2896,7 @@
         "type": "object",
         "properties": {
           "ok": {
-            "type": "integer"
+            "type": "boolean"
           }
         }
       },

@@ -15,10 +15,15 @@ infix fun String.gte(other: Any): Bson {
     return Filters.gte(this, other)
 }
 
+infix fun String.regex(pattern: String): Bson {
+    return Filters.regex(this, pattern)
+}
+
 infix fun Bson.and(other: Bson): Bson {
     return Filters.and(
         this,
         other
     )
 }
+
 

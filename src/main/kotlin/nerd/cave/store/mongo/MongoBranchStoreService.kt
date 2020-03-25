@@ -30,6 +30,11 @@ class MongoBranchStoreService(mongoStoreService: MongoStoreService) : BranchStor
         collection.insertOne(branch)
     }
 
+    override suspend fun updateBranch(branch: Branch): Boolean {
+        val query = Branch::id eq branch.id
+        return collection.updateOne(query, branch).succeedUpdateOne()
+    }
+
     override suspend fun deleteById(id: String): Boolean {
         val query = Branch::id eq id
         return collection.deleteOne(query).deletedCount == 1L

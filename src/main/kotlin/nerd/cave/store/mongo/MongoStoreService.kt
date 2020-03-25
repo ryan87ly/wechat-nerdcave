@@ -28,6 +28,7 @@ class MongoStoreService(private val config: MongoConfig, private val clock: Cloc
     override val adminSessionStoreService by lazy { MongoAdminSessionStoreService(clock, this) }
     override val publicHolidayStoreService: PublicHolidayStoreService by lazy { MongoPublicHolidayStoreService(this) }
     override val branchOpenStatusStoreService: BranchOpenStatusStoreService by lazy { MongoBranchOpenStatusStoreService(clock, this) }
+    override val notificationStoreService: NotificationStoreService by lazy { MongoNotificationStoreService(this) }
 
     private val storeServices by lazy { listOf(memberStoreService, sessionStoreService, productStoreService) }
 

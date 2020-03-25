@@ -34,7 +34,6 @@ data class WechatMember (
 ): MemberSource
 
 enum class MemberSourceType {
-    OFFLINE,
     WECHAT
 }
 
