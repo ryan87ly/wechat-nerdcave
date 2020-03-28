@@ -46,7 +46,7 @@ class CheckInEndpoints (
     private suspend fun checkIn(ctx: RoutingContext) {
         val member = ctx.nerdCaveMember()
         val branchId = ctx.bodyAsJson.getMandatoryString("branchId")
-        val token = checkInService.checkIn(member, branchId) ?: throw BadRequestException("No available ticket found!")
+        val token = checkInService.checkIn(member, branchId)
         ctx.response()
             .ok(
                 jsonObjectOf(

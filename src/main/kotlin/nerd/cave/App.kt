@@ -11,6 +11,6 @@ fun main(args: Array<String>) = runBlocking<Unit> {
     try {
         server.start()
     } catch (t: Throwable) {
-        logger.error("Error when starting MyServer $t")
+        logger.error("Error when starting Main", t)
     }
 }
