@@ -40,5 +40,5 @@ jobs:
     - name: Build docker image
       run: docker build . --file Dockerfile --tag redevil/nerdcave:$(date +%s)
     - name: Push docker image
-      run: docker redevil/nerdcave
+      run: docker push redevil/nerdcave
       
