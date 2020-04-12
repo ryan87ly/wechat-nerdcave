@@ -442,6 +442,33 @@
         }
       }
     },
+    "/admin/members/download": {
+      "get": {
+        "tags": [
+          "admin_member"
+        ],
+        "summary": "Admin - Download members csv",
+        "description": "only SUPER_USER role can make this request",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          },
+          "403": {
+            "description": "forbidden"
+          }
+        }
+      }
+    },
     "/admin/member/{memberId}": {
       "put": {
         "tags": [
@@ -833,12 +860,35 @@
         }
       }
     },
+    "/admin/orders/download": {
+      "get": {
+        "tags": [
+          "admin_order"
+        ],
+        "summary": "Admin - Download all orders csv",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized"
+          }
+        }
+      }
+    },
     "/admin/offlineorder/approve": {
       "post": {
         "tags": [
           "admin_order"
         ],
-        "summary": "Approve offline order",
+        "summary": "Admin - Approve offline order",
         "description": "Approve offline order",
         "operationId": "Approve offline order",
         "requestBody": {
@@ -1569,6 +1619,7 @@
                     "memberId": "123",
                     "memberName": "Noone",
                     "memberType": "NORMAL",
+                    "contactNumber": "12345678910",
                     "checkInTime": "20200225230516",
                     "checkInDate": "20200225"
                   },
@@ -1578,6 +1629,7 @@
                     "memberId": "234",
                     "memberName": "Paul Smith",
                     "memberType": "NORMAL",
+                    "contactNumber": "12345678911",
                     "checkInTime": "20200322210216",
                     "checkInDate": "20200322"
                   }
@@ -1644,6 +1696,26 @@
                     "checkInDate": "20200322"
                   }
                 ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/checkIn/histories/download": {
+      "get": {
+        "tags": [
+          "admin_checkIn"
+        ],
+        "summary": "admin - Downlaod all members' Check in history csv",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           }

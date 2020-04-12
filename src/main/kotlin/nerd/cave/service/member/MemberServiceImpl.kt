@@ -4,6 +4,8 @@ import nerd.cave.model.api.member.*
 import nerd.cave.model.api.product.Product
 import nerd.cave.store.StoreService
 import nerd.cave.store.mongo.MongoStoreService
+import nerd.cave.store.mongo.`in`
+import nerd.cave.store.mongo.eq
 import nerd.cave.web.exceptions.BadRequestException
 import java.time.Clock
 import java.time.ZonedDateTime
@@ -34,8 +36,16 @@ class MemberServiceImpl(private val clock: Clock, storeService: StoreService): M
         return memberStoreService.fetchMembers(start, count)
     }
 
+    override suspend fun getAllRawMembersInfo(): List<Member> {
+        return memberStoreService.fecthAllMembers()
+    }
+
     override suspend fun getRawMember(memberId: String): Member? {
         return memberStoreService.fetchById(memberId)
+    }
+
+    override suspend fun getRawMembers(memberIds: List<String>): List<Member> {
+        return memberStoreService.fetchByIds(memberIds)
     }
 
     override suspend fun updateMemberInfo(memberId:String, memberContact: MemberContact, memberDetail: MemberDetail): Boolean {

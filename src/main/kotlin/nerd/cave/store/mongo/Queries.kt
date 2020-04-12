@@ -19,11 +19,17 @@ infix fun String.regex(pattern: String): Bson {
     return Filters.regex(this, pattern)
 }
 
+infix fun String.`in`(others: List<Any>): Bson {
+    return Filters.`in`(this, others)
+}
+
 infix fun Bson.and(other: Bson): Bson {
     return Filters.and(
         this,
         other
     )
 }
+
+
 
 

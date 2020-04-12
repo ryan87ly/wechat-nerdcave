@@ -40,7 +40,7 @@ enum class Right(val description: String){
 
     // Order
     MANAGE_OFFLINE_ORDER("Manage offline order"),
-    DOWNLOAD_OFFLINE_ORDER("Download offline order"),
+    DOWNLOAD_ORDER("Download order"),
 
     // Branch
     MANAGE_BRANCH_INFO("Manage branch info"),

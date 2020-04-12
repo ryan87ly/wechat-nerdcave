@@ -23,6 +23,7 @@ data class EnrichedToken(
     val branchName: String,
     val memberId: String,
     val memberName: String,
+    val contactNumber: String,
     val memberType: MemberType,
     @get:JsonSerialize(using = ZonedDateTimeSerializer::class)
     val checkInTime: ZonedDateTime,

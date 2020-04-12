@@ -9,10 +9,6 @@ import nerd.cave.store.StoreService
 import nerd.cave.util.MongoIdGenerator
 import nerd.cave.util.toFormattedString
 import nerd.cave.web.exceptions.BadRequestException
-import org.litote.kmongo.and
-import org.litote.kmongo.eq
-import org.litote.kmongo.gt
-import org.litote.kmongo.gte
 import java.time.Clock
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -96,16 +92,30 @@ class CheckInServiceImpl(
         return tokenStoreService.history(memberId, startDateInclusive, endDateExclusive)
     }
 
+    override suspend fun allCheckInHistory(): List<EnrichedToken> {
+        val tokens = tokenStoreService.allHistories()
+            .sortedBy { it.checkInTime }
+        return toEnrichedTokens(tokens)
+    }
+
     override suspend fun membersCheckInHistory(startDateInclusive: LocalDate, endDateExclusive: LocalDate?): List<EnrichedToken> {
         val tokens = tokenStoreService.histories(startDateInclusive, endDateExclusive)
-        val memberNames = ConcurrentHashMap<String, String>()
+        return toEnrichedTokens(tokens)
+    }
+
+    private suspend fun toEnrichedTokens(tokens: List<Token>): List<EnrichedToken> {
+        val memberIds = tokens.map { it.memberId }
+            .distinct()
+        val members = memberService.getRawMembers(memberIds)
+            .associateBy { it.id }
         val branchNames = ConcurrentHashMap<String, String>()
         return tokens.map { token ->
             EnrichedToken(
                 token.branchId,
                 branchNames.getOrPut(token.branchId) { branchStoreService.fetchById(token.branchId)?.name ?: "<Unknown branch>" },
                 token.memberId,
-                memberNames.getOrPut(token.memberId) { memberService.getRawMember(token.memberId)?.memberContact?.legalName ?: "<Unknown member>" },
+                members[token.memberId]?.memberContact?.legalName ?: "<Unknown member>",
+                members[token.memberId]?.memberContact?.contactNumber ?: "<Unknown contact>",
                 token.memberType,
                 token.checkInTime,
                 token.checkInDate

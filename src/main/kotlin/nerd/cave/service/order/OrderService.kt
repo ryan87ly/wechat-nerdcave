@@ -13,6 +13,7 @@ interface OrderService {
     suspend fun newOfflineOrder(memberId: String, product: Product, branch: Branch): OfflineOrder
     suspend fun approveOfflineOrder(orderId: String, approver: Account)
     suspend fun orders(startLocalTimeInclusive: LocalDateTime?, endLocalTimeExclusive: LocalDateTime?): List<EnrichedOrder>
+    suspend fun allOrders(): List<EnrichedOrder>
     suspend fun newPayment(memberId: String, openid: String, branchId:String, products: List<Product>): WXPayment
     suspend fun updatePrepay(paymentId: String, prepayId: String, prepayInfo: WXPayResponse): Boolean
     suspend fun fetchPayment(paymentId: String): WXPayment?

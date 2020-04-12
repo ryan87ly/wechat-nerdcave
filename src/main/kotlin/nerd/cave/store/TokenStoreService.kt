@@ -10,6 +10,7 @@ interface TokenStoreService: LifeCycle {
     suspend fun fetchToken(memberId: String, checkInDate: LocalDate): Token?
     suspend fun history(memberId: String, startDateInclusive: LocalDate, endDateExclusive: LocalDate?): List<String>
     suspend fun histories(startDateInclusive: LocalDate, endDateExclusive: LocalDate?): List<Token>
+    suspend fun allHistories(): List<Token>
     suspend fun countByMemberId(startDateInclusive: LocalDate, endDateExclusive: LocalDate?): List<Pair<String, Long>>
     suspend fun countByBranch(branchId: String, startTimeInclusive: ZonedDateTime): Long
 }

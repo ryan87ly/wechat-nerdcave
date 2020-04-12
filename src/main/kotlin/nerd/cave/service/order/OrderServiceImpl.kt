@@ -89,6 +89,15 @@ class OrderServiceImpl(private val clock: Clock, storeService: StoreService, hol
             .sortedBy { it.time }
     }
 
+    override suspend fun allOrders(): List<EnrichedOrder> {
+        val offlineOrders = offlineOrderStoreService.fetchOrders(null, null)
+            .map{ it.toEnrichedOrder() }
+        val wxOrders = paymentStoreService.fetchPayments(null, null)
+            .flatMap { it.toEnrichedOrders() }
+        return offlineOrders.plus(wxOrders)
+            .sortedBy { it.time }
+    }
+
     private suspend fun OfflineOrder.toEnrichedOrder(): EnrichedOrder {
         val member = memberStoreService.fetchById(memberId)
         val memberName = member?.memberContact?.legalName?:"<id-$memberId>"

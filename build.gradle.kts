@@ -48,6 +48,7 @@ dependencies {
     implementation("commons-codec:commons-codec:1.13")
     implementation("org.slf4j:slf4j-api:1.7.29")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.12.1")
+    implementation("org.apache.commons:commons-csv:1.8")
 
     implementation(kotlin("stdlib-jdk8"))
 

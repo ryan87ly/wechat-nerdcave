@@ -42,6 +42,10 @@ class MongoTokenStoreService(storeService: MongoStoreService): TokenStoreService
         return collection.find(query).toList()
     }
 
+    override suspend fun allHistories(): List<Token> {
+        return collection.find().toList()
+    }
+
     data class RankingResult(
         @BsonId
         val memberId: String,

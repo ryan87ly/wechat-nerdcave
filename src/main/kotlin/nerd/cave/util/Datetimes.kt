@@ -10,6 +10,7 @@ val LOCALDATE_FORMMATER = DateTimeFormatter.ofPattern("yyyyMMdd")
 val LOCALDATETIME_FORMMATER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
 val TIME_ZONE = ZoneOffset.ofHours(8)
 val LOCALTIME_FORMMATER = DateTimeFormatter.ofPattern("HHmmss")
+val LOCALTIME_SPREADSHEET_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")
 
 fun String.toLocalDateTime(): LocalDateTime {
     return LocalDateTime.parse(this, LOCALDATETIME_FORMMATER)
@@ -17,6 +18,10 @@ fun String.toLocalDateTime(): LocalDateTime {
 
 fun LocalDateTime.toFormattedString(): String {
     return this.format(LOCALDATETIME_FORMMATER)
+}
+
+fun LocalTime.toSpreadSheetString(): String {
+    return this.format(LOCALTIME_SPREADSHEET_FORMATTER)
 }
 
 fun LocalDate.toFormattedString(): String {

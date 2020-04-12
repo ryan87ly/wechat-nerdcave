@@ -17,7 +17,9 @@ import nerd.cave.model.api.branch.OpenHourInfo
 import nerd.cave.model.api.branch.OpenStatus
 import nerd.cave.model.api.member.*
 import nerd.cave.model.api.notification.Notification
+import nerd.cave.model.api.order.OrderCSVDownloader
 import nerd.cave.model.api.product.*
+import nerd.cave.model.api.token.TokenCSVDownloader
 import nerd.cave.service.branch.BranchService
 import nerd.cave.service.checkin.CheckInService
 import nerd.cave.service.member.MemberService
@@ -26,7 +28,6 @@ import nerd.cave.store.StoreService
 import nerd.cave.util.*
 import nerd.cave.web.endpoints.HttpEndpoint
 import nerd.cave.web.exceptions.BadRequestException
-import nerd.cave.web.exceptions.ForbiddenException
 import nerd.cave.web.exceptions.ResourceNotFoundException
 import nerd.cave.web.exceptions.UnauthorizedException
 import nerd.cave.web.extentions.*
@@ -70,8 +71,10 @@ class AdminEndpoints(
         post("/account/updaterole") { updateAdminAccountRole(it) }
         post("/account/updatestatus") { updateAdminAccountStatus(it) }
         get("/members") { retrieveMembers(it) }
+        get("/members/download") { downloadMembers(it) }
         put("/member/:id") { updateMember(it) }
         get("/orders") { retrieveOrders(it) }
+        get("/orders/download") { downloadOrders(it) }
         get("/orders/:startTime") { retrieveOrders(it) }
         get("/orders/:startTime/:endTime") { retrieveOrders(it) }
         post("/offlineorder/approve") { approveOfflineOrder(it) }
@@ -87,9 +90,20 @@ class AdminEndpoints(
         get("/holiday") { holidaysForYear(it) }
         post("/holiday/") { addHoliday(it) }
         delete("/holiday/:date") { deleteHoliday(it) }
+        get("/checkIn/histories/download") { downloadCheckInHistory(it) }
         get("/checkIn/histories/:startDate") { membersCheckInHistory(it) }
         get("/checkIn/histories/:startDate/:endDate") { membersCheckInHistory(it) }
         post("/notification") { addNotification(it) }
+        options().handler { ctx ->
+            ctx.response().apply {
+                headers().apply {
+                    set("Access-Control-Allow-Origin", "*")
+                    set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+                }
+                statusCode = HttpResponseStatus.NO_CONTENT.code()
+                end()
+            }
+        }
     }
 
     private suspend fun adminLogin(ctx: RoutingContext) {
@@ -218,6 +232,15 @@ class AdminEndpoints(
         )
     }
 
+    private suspend fun downloadMembers(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_MEMBER_ACCOUNT)
+        val members = memberService.getAllRawMembersInfo()
+        val content = MemberCSVDownloader(members).toCSVString()
+        val fileName = "${ZonedDateTime.now(clock).toFormattedString()}-Members.csv"
+        ctx.response().respondCSV(content, fileName)
+    }
+
     private suspend fun updateMember(ctx: RoutingContext) {
         val account = ctx.adminAccount()
         account.ensureRight(Right.MANAGE_MEMBER_ACCOUNT)
@@ -289,6 +312,17 @@ class AdminEndpoints(
                 *enrichedOrders.toTypedArray()
             )
         )
+    }
+
+    private suspend fun downloadOrders(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.DOWNLOAD_ORDER)
+        val enrichedOrders = orderService.allOrders()
+        val content = OrderCSVDownloader(enrichedOrders)
+            .toCSVString()
+        val fileName = "${ZonedDateTime.now(clock).toFormattedString()}-Orders.csv"
+        ctx.response().respondCSV(content, fileName)
+
     }
 
     private suspend fun approveOfflineOrder(ctx: RoutingContext) {
@@ -532,6 +566,16 @@ class AdminEndpoints(
                 "ok" to true
             )
         )
+    }
+
+    private suspend fun downloadCheckInHistory(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_CHECKIN_INFO)
+        val enrichedTokens = checkInService.allCheckInHistory()
+        val content = TokenCSVDownloader(enrichedTokens)
+            .toCSVString()
+        val fileName = "${ZonedDateTime.now(clock).toFormattedString()}-CheckInHistory.csv"
+        ctx.response().respondCSV(content, fileName)
     }
 
     private suspend fun membersCheckInHistory(ctx: RoutingContext) {

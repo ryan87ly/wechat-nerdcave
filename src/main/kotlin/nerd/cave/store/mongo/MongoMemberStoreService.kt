@@ -46,11 +46,22 @@ class MongoMemberStoreService(private val clock: Clock, mongoStoreService: Mongo
         return collection.findOne(Member::id eq id)
     }
 
+    override suspend fun fetchByIds(ids: List<String>): List<Member> {
+        val query = "id" `in` ids
+        return collection.find(query).toList()
+    }
+
     override suspend fun fetchMembers(start: Int, count: Int): List<Member> {
         return collection.find()
             .sort("registerTime" eq  -1)
             .skip(start)
             .limit(count)
+            .toList()
+    }
+
+    override suspend fun fecthAllMembers(): List<Member> {
+        return collection.find()
+            .sort("registerTime" eq  -1)
             .toList()
     }
 

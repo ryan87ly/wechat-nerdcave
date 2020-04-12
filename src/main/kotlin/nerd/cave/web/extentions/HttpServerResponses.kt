@@ -21,6 +21,12 @@ fun HttpServerResponse.ok(content: JsonObject) {
     endIfOpen(HttpResponseStatus.OK, content.encodePrettily())
 }
 
+fun HttpServerResponse.respondCSV(content: String, fileName: String) {
+    putHeader("Content-Type", "text/csv")
+    putHeader("Content-Disposition", "attachment; filename=\"$fileName\"")
+    end(content)
+}
+
 fun HttpServerResponse.endIfOpen(statusCode: HttpResponseStatus, msg: String? = null) {
     endIfOpen(statusCode.code(), msg)
 }
