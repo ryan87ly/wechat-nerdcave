@@ -42,6 +42,7 @@ class ApiEndpoints (
         mountSubRouter("/disclaimer", DisclaimerEndpoints(vertx, sessionHandler, storeService).router)
         mountSubRouter("/offlineorder", OfflineOrderEndpoints(vertx, sessionHandler, storeService, orderService).router)
         mountSubRouter("/notification", NotificationEndpoints(vertx, sessionHandler, storeService).router)
+        mountSubRouter("/holiday", HolidayEndpoints(vertx, sessionHandler, holidayService).router)
         options().handler { ctx ->
             ctx.response().apply {
                 headers().apply {

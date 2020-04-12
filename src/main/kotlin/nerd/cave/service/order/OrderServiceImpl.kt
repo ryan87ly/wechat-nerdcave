@@ -67,7 +67,6 @@ class OrderServiceImpl(private val clock: Clock, storeService: StoreService, hol
     }
 
     override suspend fun approveOfflineOrder(orderId: String, approver: Account) {
-        if (!approver.hasRight(Right.APPROVE_OFFLINE_ORDER)) throw ForbiddenException("Account [${approver.nickname}] is not allowed to approve offline order")
         val order = offlineOrderStoreService.fetchOrder(orderId) ?: throw BadRequestException("No offline order found [$orderId]")
         if (order.status == OfflineOrderStatus.APPROVED) throw BadRequestException("Order [$orderId] has already been approved")
         val member = memberStoreService.fetchById(order.memberId) ?: throw BadRequestException("Member [${order.memberId}] not found!")

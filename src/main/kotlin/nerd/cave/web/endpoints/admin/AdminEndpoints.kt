@@ -112,7 +112,7 @@ class AdminEndpoints(
 
     private suspend fun allAdminAccounts(ctx: RoutingContext) {
         val account = ctx.adminAccount()
-        if (!account.hasRight(Right.EDIT_ADMIN_ACCOUNT)) throw BadRequestException("Not entitled to fetch all accounts")
+        account.ensureRight(Right.MANAGE_ADMIN_ACCOUNT)
         val accounts = adminAccountStoreService.allAccounts()
         ctx.response().ok(
             jsonArrayOf(
@@ -133,16 +133,16 @@ class AdminEndpoints(
     }
 
     private suspend fun createAdminAccount(ctx: RoutingContext) {
-        val creator = ctx.adminAccount()
-        if (!creator.hasRight(Right.EDIT_ADMIN_ACCOUNT)) throw ForbiddenException("Current account is not entitled to create admin account")
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_ADMIN_ACCOUNT)
         val username = ctx.bodyAsJson.getMandatoryString("username")
         if (adminAccountStoreService.usernameExists(username)) throw BadRequestException("Username $username is already used")
-        val account = ctx.bodyAsJson.toNewAdminAccount()
-        adminAccountStoreService.newAccount(account)
+        val newAccount = ctx.bodyAsJson.toNewAdminAccount()
+        adminAccountStoreService.newAccount(newAccount)
         ctx.response().endIfOpen(
             HttpResponseStatus.CREATED,
             jsonObjectOf(
-                "id" to account.id
+                "id" to newAccount.id
             ).encodePrettily()
         )
     }
@@ -164,8 +164,9 @@ class AdminEndpoints(
 
     private suspend fun updateAdminAccountPassword(ctx: RoutingContext) {
         val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_ADMIN_ACCOUNT)
         val targetId = ctx.bodyAsJson.getString("id") ?: account.id
-        if (account.id != targetId && !account.hasRight(Right.EDIT_ADMIN_ACCOUNT)) throw BadRequestException("Can only update self's password")
+        if (account.id != targetId && !account.hasRight(Right.MANAGE_ADMIN_ACCOUNT)) throw BadRequestException("Can only update self's password")
         if (adminAccountStoreService.findById(targetId) == null)  throw BadRequestException("Account not found [$targetId]")
         val hashedNewPassword = ctx.bodyAsJson.getMandatoryString("newPassword").toMD5().toUpperCase()
         if (!adminAccountStoreService.updatePassword(targetId, hashedNewPassword)) throw BadRequestException("Update password failed")
@@ -178,7 +179,7 @@ class AdminEndpoints(
 
     private suspend fun updateAdminAccountRole(ctx: RoutingContext) {
         val account = ctx.adminAccount()
-        if (!account.hasRight(Right.EDIT_ADMIN_ACCOUNT)) throw BadRequestException("Not entitled to update account role")
+        account.ensureRight(Right.MANAGE_ADMIN_ACCOUNT)
         val targetId = ctx.bodyAsJson.getMandatoryString("id")
         if (adminAccountStoreService.findById(targetId) == null)  throw BadRequestException("Account not found [$targetId]")
         val roleStr = ctx.bodyAsJson.getMandatoryString("role")
@@ -193,7 +194,7 @@ class AdminEndpoints(
 
     private suspend fun updateAdminAccountStatus(ctx: RoutingContext) {
         val account = ctx.adminAccount()
-        if (!account.hasRight(Right.EDIT_ADMIN_ACCOUNT)) throw BadRequestException("Not entitled to update account role")
+        account.ensureRight(Right.MANAGE_ADMIN_ACCOUNT)
         val targetId = ctx.bodyAsJson.getMandatoryString("id")
         if (adminAccountStoreService.findById(targetId) == null)  throw BadRequestException("Account not found [$targetId]")
         val statusStr = ctx.bodyAsJson.getMandatoryString("status")
@@ -219,7 +220,7 @@ class AdminEndpoints(
 
     private suspend fun updateMember(ctx: RoutingContext) {
         val account = ctx.adminAccount()
-        if (!account.hasRight(Right.UPDATE_MEMBER_INFO)) throw ForbiddenException("Account [${account.nickname}] is not allowed to update member")
+        account.ensureRight(Right.MANAGE_MEMBER_ACCOUNT)
         val id = ctx.request().params().get("id")
         val legalName = ctx.bodyAsJson.getMandatoryString("legalName")
         val contactNumber = ctx.bodyAsJson.getMandatoryString("contactNumber")
@@ -278,6 +279,8 @@ class AdminEndpoints(
     }
 
     private suspend fun retrieveOrders(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_OFFLINE_ORDER)
         val startTime = ctx.request().params().get("startTime")?.toLocalDateTime()
         val endTime = ctx.request().params().get("endTime")?.toLocalDateTime()
         val enrichedOrders = orderService.orders(startTime, endTime)
@@ -290,6 +293,7 @@ class AdminEndpoints(
 
     private suspend fun approveOfflineOrder(ctx: RoutingContext) {
         val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_OFFLINE_ORDER)
         val orderId = ctx.bodyAsJson.getMandatoryString("orderId")
         orderService.approveOfflineOrder(orderId, account)
         ctx.response().ok(
@@ -310,6 +314,8 @@ class AdminEndpoints(
     }
 
     private suspend fun newBranch(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_BRANCH_INFO)
         val requestBody = ctx.bodyAsJson
         val branchId = idGenerator.nextId()
         val branch = requestBody.toBranch(branchId)
@@ -324,6 +330,8 @@ class AdminEndpoints(
     }
 
     private suspend fun updateBranch(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_BRANCH_INFO)
         val requestBody = ctx.bodyAsJson
         val branchId = ctx.request().params().get("id")
         val branch = requestBody.toBranch(branchId)
@@ -339,6 +347,8 @@ class AdminEndpoints(
     }
 
     private suspend fun fetchBranchManualStatus(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_BRANCH_INFO)
         val branchId = ctx.request().params().get("id")
         val date = ctx.request().params().get("date").toLocalDate()
         val branchOpenStatus = branchService.fetchBranchOpenStatus(branchId, date)
@@ -353,6 +363,8 @@ class AdminEndpoints(
     }
 
     private suspend fun updateBranchManualStatus(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_BRANCH_INFO)
         val branchId = ctx.request().params().get("id")
         val date = ctx.request().params().get("date").toLocalDate()
         val statusStr = ctx.bodyAsJson.getMandatoryString("status")
@@ -366,6 +378,8 @@ class AdminEndpoints(
     }
 
     private suspend fun deactivateBranch(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_BRANCH_INFO)
         val branchId = ctx.request().params().get("id")
         val deactivateResult = branchStoreService.deactivate(branchId)
         if(!deactivateResult) throw ResourceNotFoundException("Branch id: [$branchId] not found")
@@ -402,6 +416,8 @@ class AdminEndpoints(
     }
 
     private suspend fun allProducts(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_PRODUCT_INFO)
         val products = productStoreService.fetchAll()
         ctx.response()
             .ok(
@@ -412,6 +428,8 @@ class AdminEndpoints(
     }
 
     private suspend fun newProduct(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_PRODUCT_INFO)
         val productId = idGenerator.nextId()
         val product = ctx.bodyAsJson.toProduct(productId)
         productStoreService.createProduct(product)
@@ -425,6 +443,8 @@ class AdminEndpoints(
     }
 
     private suspend fun updateProduct(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_PRODUCT_INFO)
         val id = ctx.request().params().get("id")
         val product = ctx.bodyAsJson.toProduct(id)
         if (!productStoreService.updateProduct(product)) throw BadRequestException("No Product with id [$id] found")
@@ -476,6 +496,8 @@ class AdminEndpoints(
     }
 
     private suspend fun holidaysForYear(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_HOLIDAY_INFO)
         val year = ctx.queryParams().get("year").toInt()
         val allHolidays = holidayStoreService.getHolidays(year)
         ctx.response().ok(
@@ -486,6 +508,8 @@ class AdminEndpoints(
     }
 
     private suspend fun addHoliday(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_HOLIDAY_INFO)
         val date = ctx.bodyAsJson.getMandatoryString("date").toLocalDate()
         if (holidayStoreService.hasRecord(date)) throw BadRequestException("${date.toFormattedString()} is already set as public holiday")
         holidayStoreService.addHoliday(date)
@@ -498,6 +522,8 @@ class AdminEndpoints(
     }
 
     private suspend fun deleteHoliday(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_HOLIDAY_INFO)
         val date = ctx.request().params().get("date").toLocalDate()
         if (!holidayStoreService.hasRecord(date)) throw BadRequestException("${date.toFormattedString()} is not set as public holiday")
         holidayStoreService.removeHoliday(date)
@@ -509,6 +535,8 @@ class AdminEndpoints(
     }
 
     private suspend fun membersCheckInHistory(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_CHECKIN_INFO)
         val startDate = ctx.request().params().get("startDate")?.toLocalDate() ?: throw BadRequestException("startDate is required but missing in request path")
         val endDate = ctx.request().params().get("endDate")?.toLocalDate()
         val tokens = checkInService.membersCheckInHistory(startDate, endDate)
@@ -520,6 +548,8 @@ class AdminEndpoints(
     }
 
     private suspend fun addNotification(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        account.ensureRight(Right.MANAGE_NOTIFICATION)
         val id = idGenerator.nextId()
         val title = ctx.bodyAsJson.getMandatoryString("title")
         val detail = ctx.bodyAsJson.getMandatoryString("detail")

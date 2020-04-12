@@ -85,6 +85,10 @@
     {
       "name": "notification",
       "description": "通知"
+    },
+    {
+      "name": "holiday",
+      "description": "Holiday"
     }
   ],
   "paths": {
@@ -2426,6 +2430,39 @@
                 },
                 "example": {
                   "ok": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/holiday/isholiday/{date}": {
+      "get": {
+        "tags": [
+          "holiday"
+        ],
+        "summary": "Check if a date is holdiday, including weekends",
+        "operationId": "isHoliday",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "description": "Date to check",
+            "required": true,
+            "example": "20200501",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "example": {
+                  "isHoliday": true
                 }
               }
             }

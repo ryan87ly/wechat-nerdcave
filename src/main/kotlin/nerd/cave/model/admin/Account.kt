@@ -1,5 +1,6 @@
 package nerd.cave.model.admin
 
+import nerd.cave.web.exceptions.ForbiddenException
 import java.time.ZonedDateTime
 
 data class Account(
@@ -17,7 +18,7 @@ enum class Role (private vararg val rights: Right) {
         *Right.values()
     ),
     BRANCH_MAINTAINER(
-        Right.APPROVE_OFFLINE_ORDER
+        Right.MANAGE_OFFLINE_ORDER
     );
 
     fun hasRight(right: Right): Boolean {
@@ -30,12 +31,37 @@ enum class AccountStatus {
     DISABLED
 }
 
-enum class Right{
-    EDIT_ADMIN_ACCOUNT,
-    UPDATE_MEMBER_INFO,
-    APPROVE_OFFLINE_ORDER
+enum class Right(val description: String){
+    // Account
+    MANAGE_ADMIN_ACCOUNT("Manage admin account"),
+
+    // Member
+    MANAGE_MEMBER_ACCOUNT("Manage member account"),
+
+    // Order
+    MANAGE_OFFLINE_ORDER("Manage offline order"),
+    DOWNLOAD_OFFLINE_ORDER("Download offline order"),
+
+    // Branch
+    MANAGE_BRANCH_INFO("Manage branch info"),
+
+    // Product
+    MANAGE_PRODUCT_INFO("Manage product info"),
+
+    // Holiday
+    MANAGE_HOLIDAY_INFO("Manage holiday info"),
+
+    // Check-in
+    MANAGE_CHECKIN_INFO("Manage checkin info"),
+
+    // Notification
+    MANAGE_NOTIFICATION("Manage notification")
 }
 
 fun Account.hasRight(right: Right):Boolean {
     return role.hasRight(right)
+}
+
+fun Account.ensureRight(right: Right) {
+    if(!this.hasRight(right)) throw ForbiddenException("Current account is not entitled to ${right.description}")
 }
