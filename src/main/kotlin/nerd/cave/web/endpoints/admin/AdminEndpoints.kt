@@ -70,6 +70,7 @@ class AdminEndpoints(
         post("/account/updatepassword") { updateAdminAccountPassword(it) }
         post("/account/updaterole") { updateAdminAccountRole(it) }
         post("/account/updatestatus") { updateAdminAccountStatus(it) }
+        get("/account/info") { getAccountInfo(it) }
         get("/members") { retrieveMembers(it) }
         get("/members/download") { downloadMembers(it) }
         put("/member/:id") { updateMember(it) }
@@ -132,6 +133,13 @@ class AdminEndpoints(
             jsonArrayOf(
                 *accounts.map { it.toJsonObject() }.toTypedArray()
             )
+        )
+    }
+
+    private suspend fun getAccountInfo(ctx: RoutingContext) {
+        val account = ctx.adminAccount()
+        ctx.response().ok(
+            account.toJsonObject()
         )
     }
 

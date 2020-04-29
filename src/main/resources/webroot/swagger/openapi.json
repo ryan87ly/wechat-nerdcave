@@ -127,6 +127,40 @@
         }
       }
     },
+    "/admin/account/info": {
+      "get": {
+        "tags": [
+          "admin_account"
+        ],
+        "summary": "Get current admin account info",
+        "operationId": "get admin info",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminInfo"
+                },
+                "example": [
+                  {
+                    "id": "5e6cea82e357225ab0ddbaab",
+                    "username": "admin",
+                    "nickname": "RY",
+                    "role": "SUPER_USER",
+                    "status": "ACTIVE",
+                    "creationTime": "20200314223026"
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "description": "unthorizaed"
+          }
+        }
+      }
+    },
     "/admin/accounts": {
       "get": {
         "tags": [
