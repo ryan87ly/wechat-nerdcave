@@ -13,8 +13,9 @@ import java.time.Clock
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
-class CheckInServiceImpl(
+class CheckInServiceImpl @Inject constructor(
     private val clock: Clock,
     storeService: StoreService,
     private val memberService: MemberService,

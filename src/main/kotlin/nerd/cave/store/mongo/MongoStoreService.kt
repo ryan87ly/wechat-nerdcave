@@ -9,8 +9,9 @@ import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoConfiguration
 import java.time.Clock
+import javax.inject.Inject
 
-class MongoStoreService(private val config: MongoConfig, private val clock: Clock): StoreService {
+class MongoStoreService @Inject constructor(private val config: MongoConfig, private val clock: Clock): StoreService {
     private lateinit var mongoClient: CoroutineClient
     lateinit var db: CoroutineDatabase
     override val memberStoreService by lazy { MongoMemberStoreService(clock, this) }

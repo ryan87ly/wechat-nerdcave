@@ -30,9 +30,10 @@ import nerd.cave.web.wx.payment.PaymentSecretRetriever
 import nerd.cave.web.wx.payment.WXPayClient
 import org.slf4j.LoggerFactory
 import java.time.Clock
+import javax.inject.Inject
 
-class WebServer(
-    environment: Environment,
+class WebServer @Inject constructor(
+    private val environment: Environment,
     private val vertx: Vertx,
     private val clock: Clock,
     private val webClient: WebClient,
@@ -54,6 +55,7 @@ class WebServer(
     }
 
     override suspend fun start() {
+        logger.info("Running webserver on $environment")
         val port = System.getProperty("server.port")?.toInt() ?: 8080
         val router = buildRouter()
 

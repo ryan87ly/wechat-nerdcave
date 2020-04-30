@@ -9,8 +9,9 @@ import nerd.cave.store.mongo.eq
 import nerd.cave.util.toFormattedString
 import org.bson.Document
 import java.time.LocalDate
+import javax.inject.Inject
 
-class CheckInNumberGeneratorMongoImpl(mongoStoreService: MongoStoreService): CheckInNumberGenerator {
+class CheckInNumberGeneratorMongoImpl @Inject constructor(mongoStoreService: MongoStoreService): CheckInNumberGenerator {
     private val collection by lazy { mongoStoreService.getCollection<Document>("CheckInNumber") }
     private companion object {
         val MOD = 100

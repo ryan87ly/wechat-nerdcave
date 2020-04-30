@@ -49,6 +49,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:1.7.29")
     implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.12.1")
     implementation("org.apache.commons:commons-csv:1.8")
+    implementation("com.google.inject:guice:4.2.3")
 
     implementation(kotlin("stdlib-jdk8"))
 

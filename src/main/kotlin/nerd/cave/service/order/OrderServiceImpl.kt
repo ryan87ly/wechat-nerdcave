@@ -31,8 +31,9 @@ import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
+import javax.inject.Inject
 
-class OrderServiceImpl(private val clock: Clock, storeService: StoreService, holidayService: HolidayService): OrderService {
+class OrderServiceImpl @Inject constructor(private val clock: Clock, storeService: StoreService, holidayService: HolidayService): OrderService {
     companion object {
         private val logger = LoggerFactory.getLogger(OrderServiceImpl::class.java)
     }

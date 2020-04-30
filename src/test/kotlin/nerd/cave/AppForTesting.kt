@@ -4,7 +4,7 @@ import kotlinx.coroutines.runBlocking
 
 fun main(args: Array<String>) = runBlocking {
     val env = Environment.LOCAL
-    val server = NerdCaveServer(env)
+    val server = NerdCaveServer.create(env)
     try {
         server.start()
     } catch (t: Throwable) {

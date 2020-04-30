@@ -7,8 +7,9 @@ import nerd.cave.web.exceptions.BadRequestException
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class BranchServiceImpl(private val clock:Clock, storeService: StoreService, private val holidayService: HolidayService): BranchService {
+class BranchServiceImpl @Inject constructor(private val clock:Clock, storeService: StoreService, private val holidayService: HolidayService): BranchService {
     private val branchStoreService by lazy { storeService.branchStoreService }
     private val branchOpenStatusStoreService by lazy { storeService.branchOpenStatusStoreService }
 

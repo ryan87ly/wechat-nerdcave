@@ -9,8 +9,9 @@ import nerd.cave.store.mongo.eq
 import nerd.cave.web.exceptions.BadRequestException
 import java.time.Clock
 import java.time.ZonedDateTime
+import javax.inject.Inject
 
-class MemberServiceImpl(private val clock: Clock, storeService: StoreService): MemberService {
+class MemberServiceImpl @Inject constructor(private val clock: Clock, storeService: StoreService): MemberService {
     private val ticketStoreService by lazy { storeService.ticketStoreService }
     private val memberStoreService by lazy { storeService.memberStoreService }
 

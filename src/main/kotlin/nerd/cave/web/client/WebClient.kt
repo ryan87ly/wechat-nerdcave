@@ -11,11 +11,12 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executor
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class WebClient (val executor: Executor): LifeCycle {
+class WebClient @Inject constructor(val executor: Executor): LifeCycle {
     private lateinit var httpClient: HttpClient
 
     companion object {
