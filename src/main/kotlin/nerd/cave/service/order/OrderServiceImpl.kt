@@ -87,7 +87,7 @@ class OrderServiceImpl @Inject constructor(private val clock: Clock, storeServic
         val wxOrders = paymentStoreService.fetchPayments(startDateTimeInclusive, endDateTimeExclusive)
             .flatMap { it.toEnrichedOrders() }
         return offlineOrders.plus(wxOrders)
-            .sortedBy { it.time }
+            .sortedByDescending { it.time }
     }
 
     override suspend fun allOrders(): List<EnrichedOrder> {
@@ -96,7 +96,7 @@ class OrderServiceImpl @Inject constructor(private val clock: Clock, storeServic
         val wxOrders = paymentStoreService.fetchPayments(null, null)
             .flatMap { it.toEnrichedOrders() }
         return offlineOrders.plus(wxOrders)
-            .sortedBy { it.time }
+            .sortedByDescending { it.time }
     }
 
     private suspend fun OfflineOrder.toEnrichedOrder(): EnrichedOrder {

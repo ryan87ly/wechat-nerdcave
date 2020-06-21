@@ -4,6 +4,7 @@ import nerd.cave.model.api.member.MemberType
 import nerd.cave.util.CSVWriter
 import nerd.cave.util.toFormattedString
 import nerd.cave.util.toSpreadSheetString
+import java.time.Clock
 
 class TokenCSVDownloader(private val tokens: List<EnrichedToken>) {
     private val headers = linkedMapOf(
@@ -15,16 +16,16 @@ class TokenCSVDownloader(private val tokens: List<EnrichedToken>) {
         "branchName" to "下单地点"
     )
 
-    fun toCSVString(): String {
+    fun toCSVString(clock: Clock): String {
         return CSVWriter(headers)
-            .addRows( *tokens.map { it.toMap() }.toTypedArray() )
+            .addRows( *tokens.map { it.toMap(clock) }.toTypedArray() )
             .toCSVString()
     }
 
-    private fun EnrichedToken.toMap(): Map<String, String?> {
+    private fun EnrichedToken.toMap(clock: Clock): Map<String, String?> {
         return mapOf(
             "date" to this.checkInDate.toFormattedString(),
-            "time" to this.checkInTime.toLocalTime().toSpreadSheetString(),
+            "time" to this.checkInTime.withZoneSameInstant(clock.zone).toLocalTime().toSpreadSheetString(),
             "legalName" to this.memberName,
             "contactNumber" to this.contactNumber,
             "memberType" to this.memberType.toDisplayName(),

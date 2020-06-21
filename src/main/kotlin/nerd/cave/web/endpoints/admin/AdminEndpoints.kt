@@ -63,6 +63,16 @@ class AdminEndpoints(
     private val notificationStoreService by lazy { storeService.notificationStoreService }
 
     override val router = Router.router(vertx).coroutine(vertx.dispatcher(), logger).apply {
+        options().handler { ctx ->
+            ctx.response().apply {
+                headers().apply {
+                    set("Access-Control-Allow-Origin", "https://nerdcave.club")
+                    set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+                }
+                statusCode = HttpResponseStatus.NO_CONTENT.code()
+                end()
+            }
+        }
         post("/login") { adminLogin(it) }
         route(adminSessionHandler.handler)
         get("/accounts") { allAdminAccounts(it) }
@@ -95,16 +105,7 @@ class AdminEndpoints(
         get("/checkIn/histories/:startDate") { membersCheckInHistory(it) }
         get("/checkIn/histories/:startDate/:endDate") { membersCheckInHistory(it) }
         post("/notification") { addNotification(it) }
-        options().handler { ctx ->
-            ctx.response().apply {
-                headers().apply {
-                    set("Access-Control-Allow-Origin", "*")
-                    set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-                }
-                statusCode = HttpResponseStatus.NO_CONTENT.code()
-                end()
-            }
-        }
+
     }
 
     private suspend fun adminLogin(ctx: RoutingContext) {
@@ -581,7 +582,7 @@ class AdminEndpoints(
         account.ensureRight(Right.MANAGE_CHECKIN_INFO)
         val enrichedTokens = checkInService.allCheckInHistory()
         val content = TokenCSVDownloader(enrichedTokens)
-            .toCSVString()
+            .toCSVString(clock)
         val fileName = "${ZonedDateTime.now(clock).toFormattedString()}-CheckInHistory.csv"
         ctx.response().respondCSV(content, fileName)
     }

@@ -44,18 +44,18 @@ class WebServer @Inject constructor(
     private val branchService: BranchService,
     private val holidayService: HolidayService
 ): LifeCycle {
+    companion object {
+        private val logger = LoggerFactory.getLogger(WebServer::class.java)
+    }
+
     private val wxConfig = WXConfig.forEnv(environment)
     private val paymentSecretRetriever = PaymentSecretRetriever.forEnv(environment, wxConfig, webClient)
     private val wxWebClient = WXWebClient(webClient, wxConfig)
     private val wxPayClient = WXPayClient(webClient, wxConfig, paymentSecretRetriever)
     lateinit var httpServer: HttpServer
 
-    companion object {
-        val logger = LoggerFactory.getLogger(WebServer::class.java)
-    }
-
     override suspend fun start() {
-        logger.info("Running webserver on $environment")
+        logger.info("Running WebServer on $environment")
         val port = System.getProperty("server.port")?.toInt() ?: 8080
         val router = buildRouter()
 

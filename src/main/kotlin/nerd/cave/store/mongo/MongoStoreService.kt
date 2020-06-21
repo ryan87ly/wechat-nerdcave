@@ -1,6 +1,9 @@
 package nerd.cave.store.mongo
 
-import nerd.cave.store.*
+import nerd.cave.store.BranchOpenStatusStoreService
+import nerd.cave.store.NotificationStoreService
+import nerd.cave.store.PublicHolidayStoreService
+import nerd.cave.store.StoreService
 import nerd.cave.store.config.MongoConfig
 import org.litote.kmongo.coroutine.CoroutineClient
 import org.litote.kmongo.coroutine.CoroutineCollection
@@ -8,12 +11,18 @@ import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import org.litote.kmongo.util.KMongoConfiguration
+import org.slf4j.LoggerFactory
 import java.time.Clock
 import javax.inject.Inject
 
 class MongoStoreService @Inject constructor(private val config: MongoConfig, private val clock: Clock): StoreService {
+    companion object {
+        private val logger = LoggerFactory.getLogger(MongoStoreService::class.java)
+    }
+
     private lateinit var mongoClient: CoroutineClient
     lateinit var db: CoroutineDatabase
+
     override val memberStoreService by lazy { MongoMemberStoreService(clock, this) }
     override val memberEventStoreService by lazy { MongoMemberEventStoreService(this) }
     override val sessionStoreService by lazy { MongoSessionStoreService(clock, this) }
@@ -31,9 +40,29 @@ class MongoStoreService @Inject constructor(private val config: MongoConfig, pri
     override val branchOpenStatusStoreService: BranchOpenStatusStoreService by lazy { MongoBranchOpenStatusStoreService(clock, this) }
     override val notificationStoreService: NotificationStoreService by lazy { MongoNotificationStoreService(this) }
 
-    private val storeServices by lazy { listOf(memberStoreService, sessionStoreService, productStoreService) }
+    private val storeServices by lazy {
+        listOf(
+            memberStoreService,
+            memberEventStoreService,
+            sessionStoreService,
+            productStoreService,
+            branchStoreService,
+            WXPaymentStoreService,
+            ticketStoreService,
+            tokenStoreService,
+            wxPaymentCallbackStoreService,
+            disclaimerStoreService,
+            offlineOrderStoreService,
+            adminAccountStoreService,
+            adminSessionStoreService,
+            publicHolidayStoreService,
+            branchOpenStatusStoreService,
+            notificationStoreService
+        )
+    }
 
     override suspend fun start() {
+        logger.info("Starting MongoStoreService")
         KMongoConfiguration.bsonMapper.registerModule(NerdCaveModule)
         mongoClient = KMongo.createClient(config.mongoClientSetting).coroutine
         db = mongoClient.getDatabase(config.dbName)

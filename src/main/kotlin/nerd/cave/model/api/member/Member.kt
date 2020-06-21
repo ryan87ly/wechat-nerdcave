@@ -61,13 +61,13 @@ data class YearlyMember (
     override val validFrom:LocalDate,
     override val validUntil: LocalDate,
     override val memberType: MemberType = MemberType.YEARLY
-): SpecialMemberDetail
+): UnlimitedEntriesMemberDetail
 
 data class MonthlyMember (
     override val validFrom:LocalDate,
     override val validUntil: LocalDate,
     override val memberType: MemberType = MemberType.MONTHLY
-): SpecialMemberDetail
+): UnlimitedEntriesMemberDetail
 
 data class MultiEntriesMember (
     val usedEntries: Int,

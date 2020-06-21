@@ -39,7 +39,7 @@ class CheckInServiceImpl @Inject constructor(
                 is UnlimitedEntriesMemberDetail -> createTokenForUnlimitedMember(member.id, effectiveMemberDetail.memberType, branch.id, checkInDate)
                 is MultiEntriesMember -> createTokenForMultiEntriesMember(member, branch.id, checkInDate)
                 is NormalMember -> if (effectiveMemberDetail.remainingEntries > 0) createTokenFromTicket(member.id, branch.id, checkInDate) else throw BadRequestException("No available ticket found!")
-                else -> throw BadRequestException("Unsupported member")
+                else -> throw BadRequestException("Unsupported member: $effectiveMemberDetail")
             }
     }
 
@@ -95,13 +95,14 @@ class CheckInServiceImpl @Inject constructor(
 
     override suspend fun allCheckInHistory(): List<EnrichedToken> {
         val tokens = tokenStoreService.allHistories()
-            .sortedBy { it.checkInTime }
+            .sortedByDescending { it.checkInTime }
         return toEnrichedTokens(tokens)
     }
 
     override suspend fun membersCheckInHistory(startDateInclusive: LocalDate, endDateExclusive: LocalDate?): List<EnrichedToken> {
         val tokens = tokenStoreService.histories(startDateInclusive, endDateExclusive)
         return toEnrichedTokens(tokens)
+            .sortedByDescending { it.checkInTime }
     }
 
     private suspend fun toEnrichedTokens(tokens: List<Token>): List<EnrichedToken> {

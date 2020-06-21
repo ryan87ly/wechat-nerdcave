@@ -3,6 +3,7 @@ package nerd.cave.util
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
+import nerd.cave.web.exceptions.BadRequestException
 import java.time.*
 import java.time.format.DateTimeFormatter
 
@@ -13,7 +14,11 @@ val LOCALTIME_FORMMATER = DateTimeFormatter.ofPattern("HHmmss")
 val LOCALTIME_SPREADSHEET_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")
 
 fun String.toLocalDateTime(): LocalDateTime {
-    return LocalDateTime.parse(this, LOCALDATETIME_FORMMATER)
+    try {
+        return LocalDateTime.parse(this, LOCALDATETIME_FORMMATER)
+    } catch (e: DateTimeException) {
+        throw BadRequestException(e.message)
+    }
 }
 
 fun LocalDateTime.toFormattedString(): String {
@@ -33,7 +38,11 @@ fun ZonedDateTime.toFormattedString(): String {
 }
 
 fun String.toLocalDate(): LocalDate {
-    return LocalDate.parse(this, LOCALDATE_FORMMATER)
+    try {
+        return LocalDate.parse(this, LOCALDATE_FORMMATER)
+    } catch (e: DateTimeException) {
+        throw BadRequestException(e.message)
+    }
 }
 
 class LocalDateSerializer: JsonSerializer<LocalDate>() {

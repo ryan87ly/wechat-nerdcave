@@ -13,9 +13,11 @@ import javax.inject.Inject
 
 class CheckInNumberGeneratorMongoImpl @Inject constructor(mongoStoreService: MongoStoreService): CheckInNumberGenerator {
     private val collection by lazy { mongoStoreService.getCollection<Document>("CheckInNumber") }
+
     private companion object {
         val MOD = 100
     }
+
     override suspend fun nextNumber(date: LocalDate, branchId: String): String {
         val query = and(
             "branchId" eq branchId,

@@ -11,7 +11,8 @@ import javax.inject.Singleton
 class StoreModule(private val env: Environment): AbstractModule()  {
 
     override fun configure() {
-        bind(StoreService::class.java).to(MongoStoreService::class.java).`in`(Singleton::class.java)
+        bind(MongoStoreService::class.java).`in`(Singleton::class.java)
+        bind(StoreService::class.java).to(MongoStoreService::class.java)
     }
 
     @Provides
